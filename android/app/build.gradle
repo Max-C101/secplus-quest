@@ -1,0 +1,45 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.secplusquest.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.secplusquest.app'
+        minSdk 26
+        targetSdk 34
+        // Each GitHub build gets a higher version so updates install over the old app
+        versionCode (System.getenv('GITHUB_RUN_NUMBER') ?: '1').toInteger()
+        versionName "1.0.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"
+    }
+
+    signingConfigs {
+        release {
+            // Same key every build, so new versions install as updates (progress is kept)
+            storeFile file('release.keystore')
+            storePassword 'REMOVED'
+            keyAlias 'secplus'
+            keyPassword 'REMOVED'
+            storeType 'pkcs12'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Sec+ Quest</string>
+    <string name="widget_name">Sec+ Quest progress</string>
+    <string name="widget_desc">Streak, daily XP and review cards due</string>
+</resources>

@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#58cc02">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Sec+ Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#58cc02;--green-d:#58a700;--blue:#1cb0f6;--blue-d:#1899d6;--red:#ff4b4b;--red-d:#ea2b2b;
+  --gold:#ffc800;--gold-d:#e5a800;--orange:#ff9600;--line:#e5e5e5;--line-d:#cfcfcf;--gray-d:#afafaf;
+  --text:#3c3c3c;--sub:#777;--purple:#ce82ff;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#fff;color:var(--text);font-family:Nunito,system-ui,-apple-system,sans-serif;color-scheme:light}
+body{min-height:100vh;min-height:100dvh}
+button{font-family:inherit;cursor:pointer}
+#app{max-width:520px;margin:0 auto;min-height:100vh;min-height:100dvh;position:relative}
+
+/* header */
+.top{position:sticky;top:0;z-index:20;background:#fff;border-bottom:2px solid var(--line);
+  padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;display:flex;justify-content:space-between;align-items:center}
+.chip{display:flex;align-items:center;gap:8px;font-weight:900;font-size:17px}
+.chip small{font-weight:800;font-size:11px;color:var(--sub);border:2px solid var(--line);border-radius:8px;padding:1px 6px}
+.stats{display:flex;gap:14px}
+.stat{display:flex;align-items:center;gap:4px;font-weight:900;font-size:16px;background:none;border:0;padding:4px 2px;color:var(--text)}
+.stat.fire{color:var(--orange)} .stat.dim{color:var(--gray-d)} .stat.dim .em{filter:grayscale(1);opacity:.6}
+.stat.xp{color:var(--gold-d)} .stat.heart{color:var(--red)}
+
+main{padding:16px 16px calc(100px + env(safe-area-inset-bottom))}
+
+/* nav */
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:2px solid var(--line);z-index:20;padding-bottom:env(safe-area-inset-bottom)}
+.nav-in{display:flex;max-width:520px;margin:0 auto}
+.nav button{flex:1;background:none;border:0;padding:8px 0 8px;display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-weight:800;font-size:11px;color:var(--sub);letter-spacing:.05em;text-transform:uppercase}
+.nav .ico{width:46px;height:34px;border-radius:12px;display:grid;place-items:center;font-size:21px;border:2px solid transparent}
+.nav button.on{color:var(--blue-d)} .nav button.on .ico{background:#ddf4ff;border-color:#84d8ff}
+
+/* buttons */
+.btn{display:block;width:100%;border:0;border-radius:16px;padding:14px 16px;font-weight:900;font-size:16px;letter-spacing:.06em;
+  text-transform:uppercase;color:#fff;background:var(--green);box-shadow:0 4px 0 var(--green-d);transition:transform .06s,box-shadow .06s;margin-bottom:4px}
+.btn:active:not(:disabled){transform:translateY(4px);box-shadow:0 0 0 transparent}
+.btn.blue{background:var(--blue);box-shadow:0 4px 0 var(--blue-d)}
+.btn.red{background:var(--red);box-shadow:0 4px 0 var(--red-d)}
+.btn.gold{background:var(--gold);box-shadow:0 4px 0 var(--gold-d);color:#6b4e00}
+.btn.ghost{background:#fff;color:var(--blue-d);border:2px solid var(--line);box-shadow:0 4px 0 var(--line)}
+.btn.plain{background:none;box-shadow:none;color:var(--blue-d)}
+.btn:disabled{background:var(--line);color:var(--gray-d);box-shadow:0 4px 0 var(--line-d);cursor:default}
+.btn + .btn{margin-top:12px}
+
+/* cards */
+.card{border:2px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
+.card h3{margin:0 0 6px;font-size:18px;font-weight:900}
+.muted{color:var(--sub);font-weight:700;font-size:14px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pbar{height:14px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:10px}
+.pbar i{display:block;height:100%;border-radius:99px;background:var(--gold);transition:width .4s}
+.pbar.green i{background:var(--green)}
+.link{background:none;border:0;color:var(--blue-d);font-weight:900;font-size:14px;padding:0;text-transform:uppercase;letter-spacing:.04em}
+
+/* path */
+.unit{border-radius:18px;padding:16px 18px;color:#fff;margin:22px 0 4px;box-shadow:0 5px 0 var(--ud);background:var(--uc)}
+.unit .k{font-weight:900;font-size:13px;opacity:.9;letter-spacing:.06em;text-transform:uppercase}
+.unit .n{font-weight:900;font-size:20px;margin-top:2px}
+.unit .w{font-weight:800;font-size:13px;margin-top:6px;opacity:.95}
+.path{display:flex;flex-direction:column;align-items:center;gap:22px;padding:30px 0 12px}
+.stop{display:flex;flex-direction:column;align-items:center;position:relative}
+.node{position:relative;width:74px;height:68px;border-radius:50%;border:0;background:var(--uc);box-shadow:0 8px 0 var(--ud);
+  display:grid;place-items:center;transition:transform .06s,box-shadow .06s}
+.node:active{transform:translateY(6px);box-shadow:0 2px 0 var(--ud)}
+.node svg{width:34px;height:34px}
+.node.locked{background:#e5e5e5;box-shadow:0 8px 0 #b7b7b7}
+.node.locked:active{box-shadow:0 2px 0 #b7b7b7}
+.node.done{background:var(--gold);box-shadow:0 8px 0 var(--gold-d)}
+.node.done:active{box-shadow:0 2px 0 var(--gold-d)}
+.node.cur::after{content:"";position:absolute;inset:-9px;border-radius:50%;border:5px solid var(--uc);opacity:.35;animation:pulse 1.6s ease-in-out infinite}
+.bubble{position:absolute;top:-40px;left:50%;transform:translateX(-50%);background:#fff;border:2px solid var(--line);color:var(--uc2);
+  font-weight:900;font-size:14px;padding:6px 12px;border-radius:12px;letter-spacing:.06em;white-space:nowrap;animation:bob 1.6s ease-in-out infinite;z-index:2}
+.bubble::after{content:"";position:absolute;bottom:-8px;left:50%;transform:translateX(-50%) rotate(45deg);width:12px;height:12px;background:#fff;border-right:2px solid var(--line);border-bottom:2px solid var(--line)}
+.crowns{position:absolute;right:-8px;bottom:-4px;background:#fff;border:2px solid var(--gold-d);color:var(--gold-d);font-weight:900;font-size:12px;border-radius:99px;padding:0 6px}
+.slabel{margin-top:14px;font-weight:800;font-size:13px;color:var(--sub);text-align:center;max-width:150px;line-height:1.2}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.35}50%{transform:scale(1.08);opacity:.15}}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-4px)}}
+
+/* overlay sheet */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;display:flex;align-items:flex-end;justify-content:center;animation:fade .15s}
+.sheet{background:#fff;width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom));animation:up .22s cubic-bezier(.2,.8,.2,1);max-height:88vh;overflow:auto}
+.sheet h2{margin:0 0 4px;font-size:22px;font-weight:900}
+.sheet ul{padding-left:0;list-style:none;margin:14px 0 18px}
+.sheet li{display:flex;gap:10px;font-weight:700;font-size:15px;line-height:1.35;margin-bottom:10px}
+.sheet li::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:var(--uc,var(--blue));margin-top:6px}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+
+/* lesson */
+.lesson{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 12px) 16px 0}
+.lhead{display:flex;align-items:center;gap:12px}
+.x{background:none;border:0;font-size:24px;color:var(--gray-d);padding:4px 6px;font-weight:900}
+.bar{flex:1;height:16px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--green);border-radius:99px;transition:width .35s;position:relative}
+.bar i::after{content:"";position:absolute;left:10px;right:10px;top:3px;height:4px;border-radius:9px;background:rgba(255,255,255,.35)}
+.hp{font-weight:900;color:var(--red);font-size:16px;white-space:nowrap}
+.tag{font-weight:900;font-size:12px;color:var(--blue-d);letter-spacing:.06em}
+.timer{font-weight:900;font-size:15px;color:var(--blue-d);font-variant-numeric:tabular-nums;min-width:48px;text-align:right}
+.timer.low{color:var(--red)}
+.lbody{flex:1;padding:22px 0 300px}
+.qlabel{font-weight:900;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--uc2,var(--purple));display:flex;gap:8px;align-items:center}
+.qlabel .dot{width:10px;height:10px;border-radius:50%;background:var(--uc,var(--purple))}
+.qtext{font-size:21px;font-weight:800;line-height:1.32;margin:10px 0 22px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-bottom-width:4px;
+  border-radius:14px;padding:13px 14px;font-weight:700;font-size:16px;color:var(--text);margin-bottom:10px;line-height:1.3}
+.opt:active:not(:disabled){border-bottom-width:2px;transform:translateY(2px)}
+.opt .k{width:28px;height:28px;border:2px solid var(--line);border-radius:8px;display:grid;place-items:center;font-size:13px;color:var(--gray-d);flex:none;font-weight:900}
+.opt.sel{border-color:#84d8ff;background:#ddf4ff;color:var(--blue-d)} .opt.sel .k{border-color:#84d8ff;color:var(--blue-d)}
+.opt.good{border-color:#a5ed6e;background:#d7ffb8;color:var(--green-d)} .opt.good .k{border-color:#a5ed6e;color:var(--green-d)}
+.opt.bad{border-color:#ffb2b2;background:#ffdfe0;color:var(--red-d)} .opt.bad .k{border-color:#ffb2b2;color:var(--red-d)}
+.opt.dim{opacity:.55}
+.opt:disabled{cursor:default}
+.tfrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tfrow .opt{justify-content:center;padding:22px 10px;font-size:18px;font-weight:900}
+.tfrow .opt .k{display:none}
+.intro-title{font-size:26px;font-weight:900;margin:8px 0 6px}
+.intro-card{border:2px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:12px;font-weight:700;font-size:16px;line-height:1.4;display:flex;gap:12px}
+.intro-card b{color:var(--uc2,var(--blue-d));font-size:18px;flex:none}
+
+.match{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mcol{display:flex;flex-direction:column;gap:10px}
+.tile{min-height:66px;background:#fff;border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;padding:10px;font-weight:800;font-size:14px;
+  color:var(--text);line-height:1.25;display:flex;align-items:center;justify-content:center;text-align:center}
+.tile.term{font-size:15px;font-weight:900}
+.tile.sel{border-color:#84d8ff;background:#ddf4ff;color:var(--blue-d)}
+.tile.bad{border-color:#ffb2b2;background:#ffdfe0;color:var(--red-d);animation:shake .35s}
+.tile.ok{border-color:var(--line);color:#ccc;background:#fafafa;border-bottom-width:2px}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+.foot{position:fixed;left:0;right:0;bottom:0;border-top:2px solid var(--line);background:#fff;padding:16px 16px calc(16px + env(safe-area-inset-bottom));z-index:30}
+.foot-in{max-width:520px;margin:0 auto}
+.foot.good{background:#d7ffb8;border-color:#d7ffb8;animation:up .2s}
+.foot.bad{background:#ffdfe0;border-color:#ffdfe0;animation:up .2s}
+.fb{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start}
+.fb-ic{flex:none;width:34px;height:34px;border-radius:50%;background:#fff;display:grid;place-items:center;font-weight:900;font-size:18px}
+.good .fb-ic{color:var(--green-d)} .bad .fb-ic{color:var(--red-d)}
+.fb-title{font-weight:900;font-size:19px}
+.good .fb-title{color:var(--green-d)} .bad .fb-title{color:var(--red-d)}
+.fb-ans{font-weight:800;font-size:16px;color:var(--red-d);margin-top:2px}
+.fb-text{font-weight:700;font-size:14.5px;line-height:1.4;margin-top:6px}
+.good .fb-text{color:#3f7a00} .bad .fb-text{color:#a3262b}
+.combo{display:inline-block;margin-left:6px;font-size:13px;background:#fff;color:var(--orange);border-radius:99px;padding:1px 8px;vertical-align:middle}
+
+/* result */
+.result{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 30px) 18px calc(24px + env(safe-area-inset-bottom));text-align:center;position:relative;overflow:hidden}
+.result .big{font-size:76px;line-height:1;margin:20px 0 10px;animation:popin .5s cubic-bezier(.2,1.6,.4,1)}
+.result h1{font-size:28px;font-weight:900;margin:8px 0;color:var(--gold-d)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0}
+.rt{border:2px solid var(--c);border-radius:16px;overflow:hidden}
+.rt .h{background:var(--c);color:#fff;font-weight:900;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:5px}
+.rt .v{font-weight:900;font-size:21px;padding:12px 4px;color:var(--c)}
+.banner{border-radius:16px;padding:14px;font-weight:800;margin-bottom:12px;text-align:left;display:flex;gap:12px;align-items:center}
+.banner.fire{background:#fff3e0;color:#b35f00}
+.banner.heart{background:#ffe8e8;color:var(--red-d)}
+.banner .e{font-size:28px}
+@keyframes popin{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
+.confetti{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;animation:fall linear forwards;pointer-events:none}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}
+.missed{text-align:left;margin-top:6px}
+.missed .card{padding:14px}
+.missed .q{font-weight:800;font-size:15px;line-height:1.35}
+.missed .a{font-weight:800;font-size:14px;margin-top:8px}
+.missed .a.y{color:var(--red-d)} .missed .a.c{color:var(--green-d)}
+.missed .e{font-weight:700;font-size:13.5px;color:var(--sub);margin-top:6px;line-height:1.4}
+
+/* stats */
+.ring{display:flex;align-items:center;gap:16px}
+.ring svg{flex:none}
+.dom{margin-bottom:14px}
+.dom .row{font-weight:800;font-size:14px}
+.dom .pbar{height:12px;margin-top:6px}
+.dom .pbar i{background:var(--uc)}
+.week{display:flex;gap:8px;align-items:flex-end;height:96px;margin-top:12px}
+.week div{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.week span{display:block;width:100%;border-radius:8px 8px 4px 4px;background:var(--line);min-height:6px}
+.week span.hit{background:var(--orange)}
+.week em{font-style:normal;font-weight:800;font-size:11px;color:var(--sub)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mini{border:2px solid var(--line);border-radius:14px;padding:12px}
+.mini .v{font-weight:900;font-size:20px} .mini .l{font-weight:700;font-size:12.5px;color:var(--sub)}
+.seg{display:flex;gap:8px;margin-top:10px}
+.seg button{flex:1;border:2px solid var(--line);border-bottom-width:4px;background:#fff;border-radius:12px;padding:9px 0;font-weight:900;font-size:14px;color:var(--sub)}
+.seg button.on{border-color:#84d8ff;background:#ddf4ff;color:var(--blue-d)}
+input[type=date]{width:100%;margin-top:10px;border:2px solid var(--line);border-radius:12px;padding:11px 12px;font:700 16px Nunito,system-ui;color:var(--text);background:#fff}
+.toggle{width:54px;height:32px;border-radius:99px;border:0;background:var(--line);position:relative;flex:none}
+.toggle::after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.toggle.on{background:var(--green)} .toggle.on::after{left:26px}
+.drow{display:flex;align-items:center;gap:12px;width:100%;background:#fff;border:2px solid var(--line);border-bottom-width:4px;border-radius:16px;padding:12px 14px;margin-bottom:10px;text-align:left;color:var(--text)}
+.drow .sw{width:14px;height:40px;border-radius:6px;background:var(--uc);flex:none}
+.drow .t{font-weight:900;font-size:15px}
+.drow .s{font-weight:700;font-size:12.5px;color:var(--sub)}
+.drow .pct{margin-left:auto;font-weight:900;color:var(--uc2)}
+.hero{text-align:center;padding:22px 16px}
+.hero .e{font-size:56px}
+.sync{font-weight:700;font-size:13px;color:var(--sub);display:flex;gap:6px;align-items:center}
+.sync i{width:9px;height:9px;border-radius:50%;background:var(--gray-d);display:inline-block}
+.sync.ok i{background:var(--green)}
+h2.sec{font-size:20px;font-weight:900;margin:18px 0 10px}
+.center{text-align:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   CONTENT — CompTIA Security+ SY0-701
+   Each question: [prompt, [CORRECT, distractor...], explanation]
+   Options are shuffled at runtime (True/False keep fixed order).
+   ============================================================ */
+const UNITS = [
+{ name:"General Security Concepts", w:12, c:"#58cc02", d:"#58a700", t:"#58a700", lessons:[
+  { id:"gc1", t:"Control Types",
+    intro:["4 categories: Technical, Managerial, Operational, Physical","6 types: Preventive, Deterrent, Detective, Corrective, Compensating, Directive","Category = WHO/WHAT implements it. Type = WHAT it does."],
+    pairs:[["Preventive","Stops it before it happens"],["Deterrent","Discourages the attempt"],["Detective","Finds & records it"],["Corrective","Fixes it afterward"],["Compensating","Substitute when the primary isn't possible"]],
+    qs:[
+      ["A firewall rule that blocks inbound Telnet is which control CATEGORY?",["Technical","Managerial","Operational","Physical"],"Technical controls are implemented by systems — firewalls, OS settings, antivirus."],
+      ["A company's annual risk assessment and security policies fall under which category?",["Managerial","Technical","Physical","Operational"],"Managerial (administrative) controls are about policies, procedures and oversight of security design."],
+      ["Security awareness training run by people (not systems) is which category?",["Operational","Technical","Managerial","Physical"],"Operational controls are implemented by people rather than systems — training, guards following procedures."],
+      ["A 'Warning: Premises Under Surveillance' sign is primarily which control TYPE?",["Deterrent","Detective","Preventive","Corrective"],"Deterrent controls discourage an attacker but don't physically stop them."],
+      ["Restoring servers from backup after a ransomware infection is which control type?",["Corrective","Detective","Deterrent","Directive"],"Corrective controls reduce impact and restore systems after an event."],
+      ["A legacy system can't be patched, so you isolate it on its own VLAN with strict ACLs. That VLAN is a ___ control.",["Compensating","Directive","Deterrent","Detective"],"Compensating controls are alternatives used when the primary control can't be applied."],
+      ["A policy stating 'All employees must store files on the encrypted share' is which type?",["Directive","Preventive","Corrective","Compensating"],"Directive controls tell people what to do — they rely on compliance."],
+      ["Reviewing logs to find unauthorized logins is a detective control. True or False?",["True","False"],"Detective controls identify and record events; they don't stop them."]
+    ]},
+  { id:"gc2", t:"CIA, AAA & Zero Trust",
+    intro:["CIA = Confidentiality, Integrity, Availability","AAA = Authentication, Authorization, Accounting","Zero trust: never trust, always verify. Policy Engine decides, Policy Administrator relays, Policy Enforcement Point enforces."],
+    pairs:[["Confidentiality","Only authorized people can read it"],["Integrity","Data hasn't been altered"],["Availability","Accessible when needed"],["Authentication","Proving who you are"],["Authorization","What you're allowed to do"]],
+    qs:[
+      ["Comparing a file's SHA-256 hash to a published value protects which part of the CIA triad?",["Integrity","Confidentiality","Availability","Non-repudiation"],"Hashes detect changes, which is integrity."],
+      ["A DDoS attack mainly targets which part of the CIA triad?",["Availability","Confidentiality","Integrity","Accounting"],"Flooding a service so legitimate users can't reach it is an attack on availability."],
+      ["Which provides non-repudiation for an email?",["Digital signature","Symmetric encryption","Hashing alone","A VPN"],"Only the sender's private key could make the signature, so the sender can't credibly deny sending it."],
+      ["In AAA, logging which files a user opened and when is called:",["Accounting","Authorization","Authentication","Attestation"],"Accounting records what authenticated users did."],
+      ["In a zero trust architecture, which component makes the allow/deny decision?",["Policy Engine","Policy Enforcement Point","Policy Administrator","Subject"],"The Policy Engine evaluates and decides. The Policy Administrator relays that decision to the PEP, which enforces it."],
+      ["The Policy Enforcement Point sits in which plane?",["Data plane","Control plane","Management plane","Application plane"],"The Policy Engine and Policy Administrator are in the control plane. The PEP enforces in the data plane, where traffic flows."],
+      ["Fake credentials planted in a database that trigger an alert when used are a:",["Honeytoken","Honeynet","Honeypot","Sinkhole"],"A honeytoken is a fake data item. A honeypot is a fake system, and a honeynet is a network of honeypots."],
+      ["A gap analysis compares:",["Current security posture to a desired standard","Two vendors' prices","Log timestamps between servers","Backup sizes over time"],"A gap analysis shows where you are, where you need to be (like NIST or ISO), and the gap between them."]
+    ]},
+  { id:"gc3", t:"Crypto Basics",
+    intro:["Symmetric = one shared key, fast (AES)","Asymmetric = public/private key pair (RSA, ECC)","Hashing is one-way. Salts beat rainbow tables. Key stretching slows brute force."],
+    pairs:[["AES","Symmetric encryption"],["RSA","Asymmetric encryption"],["SHA-256","Hashing"],["Diffie-Hellman","Key exchange"],["bcrypt","Password key stretching"]],
+    qs:[
+      ["Which algorithm is SYMMETRIC?",["AES","RSA","ECC","Diffie-Hellman"],"AES uses the same key to encrypt and decrypt. RSA and ECC are asymmetric, and Diffie-Hellman is a key-exchange method."],
+      ["To send Bob a message only Bob can read, you encrypt it with:",["Bob's public key","Bob's private key","Your private key","Your public key"],"Anyone can encrypt with Bob's public key, but only Bob's private key decrypts it."],
+      ["To create a digital signature, the sender encrypts the message hash with:",["Their own private key","The recipient's public key","Their own public key","A shared symmetric key"],"Signing uses the sender's private key. Anyone can verify with the sender's public key."],
+      ["Adding random data to each password before hashing defends mainly against:",["Rainbow table attacks","Phishing","On-path attacks","Replay attacks"],"Salting makes identical passwords produce different hashes, so precomputed rainbow tables become useless."],
+      ["PBKDF2 and bcrypt are examples of:",["Key stretching","Steganography","Tokenization","Block chaining"],"Key stretching hashes many times, which makes each brute-force guess much slower."],
+      ["Two different inputs producing the same hash is called a:",["Collision","Salt","Nonce","Downgrade"],"Strong hashes like SHA-256 resist collisions. MD5 is broken because collisions are easy to produce."],
+      ["Replacing a credit card number with a random value that maps back to it in a secure vault is:",["Tokenization","Masking","Hashing","Steganography"],"Tokenization swaps the data for a token. Masking only hides part of it, like ****-1234."],
+      ["Hiding a message inside the pixels of an image is:",["Steganography","Tokenization","Key escrow","Salting"],"Steganography hides that the data exists at all."]
+    ]},
+  { id:"gc4", t:"PKI & Certificates",
+    intro:["A CA signs certificates to vouch for identity","Revocation: CRL (a list) or OCSP (real-time check)","HSM = enterprise key hardware. TPM = chip in one device."],
+    pairs:[["CA","Signs and issues certificates"],["CSR","Request sent to a CA"],["CRL","List of revoked certificates"],["OCSP","Live revocation check"],["TPM","Key chip inside one device"]],
+    qs:[
+      ["What does a server admin send to a Certificate Authority to get a certificate?",["CSR","CRL","OCSP response","PFX"],"A Certificate Signing Request contains the public key and identity info for the CA to sign."],
+      ["Which gives REAL-TIME certificate revocation status?",["OCSP","CRL","CSR","Key escrow"],"OCSP answers per certificate on demand. A CRL is a periodically published list."],
+      ["A single certificate for *.example.com is a:",["Wildcard certificate","Self-signed certificate","Root certificate","Code-signing certificate"],"A wildcard covers every first-level subdomain of example.com."],
+      ["Why do browsers warn about a self-signed certificate?",["No trusted CA vouches for it","It uses weak encryption","It is always expired","It has no public key"],"The encryption may be fine, but no trusted third party has verified the identity."],
+      ["A dedicated, tamper-resistant appliance that manages keys for many servers is a(n):",["HSM","TPM","Secure enclave","KDC"],"Hardware Security Modules are built for enterprise-scale key storage and crypto operations."],
+      ["BitLocker uses which motherboard chip to store disk encryption keys?",["TPM","HSM","FPGA","BIOS ROM"],"The Trusted Platform Module is built into the device and provides a hardware root of trust."],
+      ["Key escrow means:",["A trusted third party holds a copy of keys","Keys rotate automatically","Keys are destroyed after use","Keys are split between two users"],"Escrow lets keys be recovered, for example by the business if an employee leaves."],
+      ["OCSP stapling means the web server attaches a timestamped OCSP response to the TLS handshake. True or False?",["True","False"],"Stapling saves the client a trip to the CA and improves privacy and speed."]
+    ]}
+]},
+{ name:"Threats, Vulnerabilities & Mitigations", w:22, c:"#ce82ff", d:"#a568cc", t:"#9b4fd1", lessons:[
+  { id:"tv1", t:"Threat Actors",
+    intro:["Nation-state = most resources, APTs, espionage","Organized crime = money. Hacktivist = ideology.","Insiders already have access. Shadow IT = unapproved tech."],
+    pairs:[["Nation-state","APTs, huge budget"],["Hacktivist","Driven by ideology"],["Organized crime","Driven by money"],["Insider","Already has access"],["Shadow IT","Unapproved tech in the org"]],
+    qs:[
+      ["Which threat actor typically has the MOST resources and runs advanced persistent threats (APTs)?",["Nation-state","Hacktivist","Unskilled attacker","Insider"],"Governments fund long-term, stealthy campaigns."],
+      ["A group defaces a company website to protest its environmental record. This is most likely a:",["Hacktivist","Organized crime group","Nation-state","Competitor"],"Hacktivists are motivated by philosophical or political beliefs."],
+      ["A ransomware gang encrypting hospitals for Bitcoin is mainly motivated by:",["Financial gain","Espionage","Ideology","Revenge"],"Organized crime is driven by money."],
+      ["A marketing team signs up for an unapproved cloud file-sharing app. This is:",["Shadow IT","An insider attack","Typosquatting","A watering hole"],"Shadow IT is technology used without IT or security approval. It's usually well-meaning but still risky."],
+      ["An attacker using downloaded exploit tools without understanding them is an:",["Unskilled attacker","APT","Hacktivist","Nation-state"],"Unskilled attackers (formerly called script kiddies) run tools other people made."],
+      ["Which actor is hardest to stop with perimeter firewalls?",["Insider threat","Nation-state","Hacktivist","Unskilled attacker"],"Insiders are already inside the perimeter with legitimate access."],
+      ["A USB stick labeled 'Payroll 2026' left in the parking lot uses which threat vector?",["Removable device","Unsecure network","Supply chain","Voice call"],"Dropping infected USB drives (baiting) depends on curiosity."],
+      ["Leaving default credentials on a router falls under the 'vulnerable software' threat vector. True or False?",["False","True"],"Default credentials are their own threat vector in SY0-701, separate from vulnerable software."]
+    ]},
+  { id:"tv2", t:"Social Engineering",
+    intro:["Phishing = email, Vishing = voice, Smishing = SMS","Pretexting = a made-up story to build trust","Watering hole = compromise a site the targets already visit"],
+    pairs:[["Phishing","Email lure"],["Vishing","Voice call lure"],["Smishing","SMS lure"],["Typosquatting","Misspelled domain"],["Watering hole","Poisoned site the victims visit"]],
+    qs:[
+      ["A text message saying 'Your package is held, click to pay $1.99' is:",["Smishing","Vishing","Whaling","Pharming"],"SMS phishing is smishing."],
+      ["A caller claims to be from the help desk and asks for your password to 'fix your account.' This is:",["Vishing","Smishing","Typosquatting","Watering hole"],"Phishing by voice call is vishing. The help-desk story is the pretext."],
+      ["Attackers compromise an industry forum that their target's engineers often visit. This is a:",["Watering hole attack","Spear phishing attack","Brand impersonation","Business email compromise"],"Instead of attacking the target directly, they poison a site the target trusts."],
+      ["Registering 'arnazon.com' to catch users who mistype is:",["Typosquatting","Pretexting","Domain hijacking","DNS poisoning"],"Typosquatting (URL hijacking) takes advantage of typing mistakes."],
+      ["The CFO's real email account is compromised and used to request an urgent wire transfer. This is:",["Business email compromise","Smishing","Watering hole","Misinformation"],"BEC uses a trusted, often real, business email account to commit fraud."],
+      ["An attacker invents a believable story ('I'm the new auditor, I need access…') to manipulate a target. This is:",["Pretexting","Tailgating","Baiting","Shoulder surfing"],"Pretexting is building a fake scenario to get information or access."],
+      ["Following an employee through a secure door without badging in is:",["Tailgating","Pretexting","Vishing","Typosquatting"],"Tailgating or piggybacking is a physical social engineering technique. Access control vestibules (mantraps) stop it."],
+      ["The BEST overall defense against phishing is:",["User awareness training plus technical email filtering","Longer passwords only","Disabling USB ports","Full disk encryption"],"People and filters together. Training helps users spot what the filters miss."]
+    ]},
+  { id:"tv3", t:"Malware & Indicators",
+    intro:["Virus needs a host and user action. Worm spreads by itself.","Trojan pretends to be legit. Rootkit hides deep in the OS.","Logic bomb waits for a trigger. Fileless malware lives in memory."],
+    pairs:[["Worm","Self-spreading"],["Trojan","Disguised as legit software"],["Rootkit","Hides in the OS/kernel"],["Logic bomb","Triggered by a condition"],["Ransomware","Encrypts files for payment"]],
+    qs:[
+      ["Malware that spreads across the network by ITSELF, without user interaction, is a:",["Worm","Virus","Trojan","Logic bomb"],"Worms self-propagate by exploiting vulnerabilities."],
+      ["A 'free PDF converter' that secretly installs a backdoor is a:",["Trojan","Worm","Rootkit","Bloatware"],"Trojans disguise themselves as legitimate software."],
+      ["Code set to delete payroll records if a certain employee is removed from HR systems is a:",["Logic bomb","Keylogger","Worm","RAT"],"A logic bomb runs when a condition or date is met."],
+      ["Malware that modifies the kernel to hide its processes from the OS is a:",["Rootkit","Spyware","Adware","Ransomware"],"Rootkits hide at a deep level and are hard to detect from inside the infected OS."],
+      ["Malware that runs entirely in memory using PowerShell, leaving little on disk, is:",["Fileless malware","A boot-sector virus","Bloatware","A macro virus"],"Fileless attacks live off the land with built-in tools and avoid file-based antivirus."],
+      ["A user logs in from Sacramento and then from Moscow 5 minutes later. This indicator is:",["Impossible travel","Resource consumption","Out-of-cycle logging","Blocked content"],"A person can't physically be in both places, so the credentials are probably compromised."],
+      ["Which malware records everything a user types?",["Keylogger","Logic bomb","Worm","Bloatware"],"Keyloggers capture keystrokes such as passwords and messages."],
+      ["Gaps in a log file during the time of a suspected breach are an indicator of compromise. True or False?",["True","False"],"Missing logs are a listed indicator. Attackers often wipe logs to cover their tracks."]
+    ]},
+  { id:"tv4", t:"Network & Password Attacks",
+    intro:["Spraying = a few passwords against many accounts. Brute force = many passwords against one.","On-path = attacker sits between two parties. ARP poisoning enables it on a LAN.","Replay = resending captured valid traffic. Downgrade = forcing weaker crypto."],
+    pairs:[["Spraying","Few passwords, many accounts"],["Brute force","Many passwords, one account"],["Replay","Resend captured traffic"],["Downgrade","Force weaker crypto"],["Evil twin","Fake Wi-Fi access point"]],
+    qs:[
+      ["Trying 'Winter2026!' against 5,000 accounts to avoid lockouts is:",["Password spraying","Brute force","Rainbow table attack","Birthday attack"],"Spraying uses a few common passwords across many accounts, which stays under lockout thresholds."],
+      ["An attacker on the LAN sends forged ARP replies so traffic flows through their machine. This enables a(n):",["On-path attack","DNS amplification","Replay attack","SQL injection"],"ARP poisoning is a classic way to get on-path (man-in-the-middle) on a local network."],
+      ["Capturing a valid authentication token and resending it later to gain access is a:",["Replay attack","Downgrade attack","Birthday attack","Directory traversal"],"Timestamps, nonces and session expiry defend against replay."],
+      ["Forcing a connection to use an older, weaker version of TLS is a:",["Downgrade attack","Replay attack","Collision attack","Privilege escalation"],"Downgrade attacks make crypto weaker so the attacker can break it. SSL stripping is one example."],
+      ["A request for '../../../../etc/passwd' in a URL indicates:",["Directory traversal","XSS","Buffer overflow","Password spraying"],"Directory traversal escapes the web root to read files the server shouldn't serve."],
+      ["Small spoofed DNS queries that trigger large responses aimed at a victim are:",["An amplified DDoS","DNS poisoning","Domain hijacking","Typosquatting"],"Amplification multiplies the attacker's bandwidth with reflectors like open DNS resolvers."],
+      ["A rogue access point broadcasting the same SSID as the corporate Wi-Fi is an:",["Evil twin","Bluejacking attack","Jamming attack","RFID clone"],"Evil twins trick users into connecting so the attacker can intercept their traffic."],
+      ["Which attack exploits hash collisions, based on probability math?",["Birthday attack","Pass-the-hash","Password spraying","Replay"],"The birthday paradox makes collisions far likelier than intuition suggests, which is why longer hashes are used."]
+    ]},
+  { id:"tv5", t:"App & System Vulnerabilities",
+    intro:["SQL injection → fix with parameterized queries and input validation","XSS = injecting script into pages other users see","Zero-day = no patch exists yet"],
+    pairs:[["SQL injection","Malicious database queries"],["XSS","Script runs in victims' browsers"],["Buffer overflow","Writes past memory bounds"],["Race condition","Timing flaw (TOCTOU)"],["Zero-day","No patch exists yet"]],
+    qs:[
+      ["Entering ' OR 1=1 -- into a login form is an attempt at:",["SQL injection","XSS","CSRF","Buffer overflow"],"It tries to make the WHERE clause always true."],
+      ["The BEST defense against SQL injection is:",["Parameterized queries (prepared statements)","Longer passwords","TLS encryption","A honeypot"],"Prepared statements treat user input as data, never as executable SQL."],
+      ["An attacker posts a forum comment containing a \x3Cscript> tag that runs in other users' browsers. This is:",["Cross-site scripting (XSS)","SQL injection","Directory traversal","Race condition"],"XSS injects client-side script that runs for other users."],
+      ["Writing more data into a memory buffer than it can hold, which overwrites adjacent memory, is a:",["Buffer overflow","Race condition","Memory leak","Integer overflow"],"Buffer overflows can let attackers run their own code. Bounds checking and ASLR help."],
+      ["A file is checked for permission, then swapped before it's used. This TOCTOU flaw is a:",["Race condition","Buffer overflow","Zero-day","Injection"],"Time-of-check to time-of-use is a race condition. The state changes between the check and the use."],
+      ["A vulnerability with no vendor patch available yet is a:",["Zero-day","False positive","Legacy flaw","Misconfiguration"],"Defenders have had zero days to fix it."],
+      ["Installing an Android app from a random website instead of the Play Store is:",["Sideloading","Jailbreaking","Rooting","Geofencing"],"Sideloading skips app store vetting. Jailbreaking or rooting removes OS restrictions."],
+      ["Attackers compromise a vendor's software update so every customer installs malware. This is a:",["Supply chain attack","Watering hole","VM escape","Typosquatting"],"Supply chain attacks abuse trust in a vendor. SolarWinds is the classic example."]
+    ]}
+]},
+{ name:"Security Architecture", w:18, c:"#1cb0f6", d:"#1899d6", t:"#1899d6", lessons:[
+  { id:"sa1", t:"Cloud & Infrastructure",
+    intro:["IaaS → you manage the most. SaaS → the provider manages the most.","IaC = infrastructure defined as code (repeatable, auditable)","Air-gapped = physically isolated. SDN splits the control and data planes."],
+    pairs:[["IaaS","You manage OS and up"],["SaaS","Provider manages almost everything"],["IaC","Infrastructure defined in code"],["Air gap","Physically isolated network"],["SDN","Separates control and data planes"]],
+    qs:[
+      ["In which cloud model does the CUSTOMER manage the operating system?",["IaaS","SaaS","PaaS","FaaS"],"In IaaS the provider gives you VMs, storage and networking, and you handle the OS and up."],
+      ["Even with SaaS, the customer is still responsible for:",["Their data and user access","Physical datacenter security","Hypervisor patching","Application code"],"The shared responsibility model always leaves data and identity with the customer."],
+      ["Deploying servers from version-controlled Terraform templates is:",["Infrastructure as Code","Serverless","Microservices","SD-WAN"],"IaC makes infrastructure consistent and repeatable, and changes are reviewable."],
+      ["Software-Defined Networking separates which two planes?",["Control plane and data plane","Physical and logical layers","LAN and WAN","Public and private clouds"],"SDN centralizes the control plane (decisions), while devices handle the data plane (forwarding)."],
+      ["A network that is physically disconnected from all other networks is:",["Air-gapped","Segmented with VLANs","Behind a DMZ","Zero trust"],"An air gap means no network path at all. Data moves by removable media."],
+      ["Industrial systems controlling a power plant's equipment are called:",["ICS/SCADA","IoT","Microservices","SD-WAN"],"SCADA and ICS are often legacy and hard to patch, so they need heavy segmentation."],
+      ["Containers differ from VMs because containers:",["Share the host OS kernel","Each run a full guest OS","Can't run on Linux","Need a Type 1 hypervisor"],"Sharing the kernel makes containers light, but a kernel flaw can affect every container."],
+      ["Embedded systems and RTOS devices are often hard to secure because they are difficult to patch. True or False?",["True","False"],"Limited compute, long lifecycles and vendor dependence make patching hard."]
+    ]},
+  { id:"sa2", t:"Network Security Devices",
+    intro:["IDS alerts (passive). IPS blocks (inline).","Fail-closed blocks traffic on failure (security first). Fail-open passes it (availability first).","802.1X = port-based network access control, usually with RADIUS"],
+    pairs:[["IDS","Detects and alerts"],["IPS","Detects and blocks inline"],["WAF","Protects web apps (Layer 7)"],["Jump server","Hardened admin entry point"],["802.1X","Port-based access control"]],
+    qs:[
+      ["Which device sits INLINE and can actively block malicious traffic?",["IPS","IDS","SIEM","Network tap"],"IDS watches and alerts. IPS is in the traffic path and drops bad packets."],
+      ["A firewall configured so that if it crashes, ALL traffic is blocked, is:",["Fail-closed","Fail-open","Active/active","Stateless"],"Fail-closed puts security ahead of availability."],
+      ["Admins first connect to a hardened server and from there reach internal servers. That server is a:",["Jump server","Reverse proxy","Load balancer","Honeypot"],"A jump server (bastion host) is a single controlled entry point for administration."],
+      ["Which device protects web apps specifically from SQL injection and XSS?",["WAF","Layer 4 firewall","NAT router","Switch"],"A web application firewall inspects HTTP traffic at Layer 7."],
+      ["Port-based authentication that blocks a device until it authenticates is:",["802.1X","WPA2-PSK","NAT","Port mirroring"],"802.1X uses a supplicant, an authenticator (switch/AP) and an authentication server (RADIUS)."],
+      ["IPsec mode that encrypts the ENTIRE original packet, used for site-to-site VPNs:",["Tunnel mode","Transport mode","AH-only mode","Aggressive mode"],"Tunnel mode wraps the whole packet in a new header. Transport mode only encrypts the payload."],
+      ["A server placed in a separate network zone so the internet can reach it but not the internal LAN is in a:",["Screened subnet (DMZ)","VLAN trunk","Air gap","Intranet"],"A screened subnet isolates public-facing services from internal systems."],
+      ["SASE combines cloud-delivered security services with SD-WAN networking. True or False?",["True","False"],"Secure Access Service Edge moves security to the cloud, close to remote users."]
+    ]},
+  { id:"sa3", t:"Data Protection",
+    intro:["Data states: at rest, in transit, in use","Data sovereignty = data is subject to the laws of the country where it's stored","Protect with encryption, hashing, masking, tokenization and segmentation"],
+    pairs:[["At rest","Stored on disk"],["In transit","Moving across a network"],["In use","Being processed in memory"],["Sovereignty","Local laws apply to the data"],["DLP","Stops sensitive data leaving"]],
+    qs:[
+      ["A database file stored on a server's SSD is data:",["At rest","In transit","In use","In motion"],"At rest means stored. Protect it with full disk or database encryption."],
+      ["Data actively being processed in RAM by an application is data:",["In use","At rest","In transit","Archived"],"Data in use is the hardest to protect. Secure enclaves help."],
+      ["A company must keep EU citizens' data on servers inside the EU. This is about:",["Data sovereignty","Data masking","Data retention","Data classification"],"Sovereignty means the data falls under the laws of the place where it physically lives."],
+      ["Showing only the last 4 digits of an SSN on a screen is:",["Masking","Tokenization","Hashing","Encryption"],"Masking hides part of the data from view."],
+      ["Medical records are classified as which data type?",["PHI","Trade secret","Public","Intellectual property"],"Protected Health Information is regulated, for example by HIPAA."],
+      ["Which tool detects and blocks sensitive data such as credit card numbers from leaving the network?",["DLP","IDS","NAC","SIEM"],"Data Loss Prevention inspects content to stop data from leaking out."],
+      ["TLS protects data in which state?",["In transit","At rest","In use","Archived"],"TLS encrypts data moving across the network."],
+      ["Restricting access to data based on the user's geographic location is a valid data protection method. True or False?",["True","False"],"Geographic restrictions (geofencing) are a listed method in the objectives."]
+    ]},
+  { id:"sa4", t:"Resilience & Recovery",
+    intro:["Hot site = ready now. Warm = partly ready. Cold = empty space.","RTO = how fast you must be back. RPO = how much data you can lose.","Restoring a differential = full + the latest differential. Restoring incrementals = full + every incremental."],
+    pairs:[["Hot site","Ready immediately"],["Cold site","Empty space, power only"],["RTO","Max downtime allowed"],["RPO","Max data loss allowed"],["UPS","Short-term battery power"]],
+    qs:[
+      ["Which recovery site is fully equipped with current data and can take over almost immediately?",["Hot site","Warm site","Cold site","Mobile site"],"Hot sites are the most expensive and the fastest."],
+      ["'We can lose at most 4 hours of data' describes the:",["RPO","RTO","MTTR","MTBF"],"The Recovery Point Objective is the maximum acceptable data loss, measured in time."],
+      ["'Systems must be back online within 2 hours' describes the:",["RTO","RPO","MTBF","SLE"],"The Recovery Time Objective is the maximum acceptable downtime."],
+      ["Full backup on Sunday, DIFFERENTIAL every other day. Restoring Thursday needs:",["Sunday full + Wednesday's differential","Sunday full + every differential","Only Wednesday's differential","Every backup since Sunday in order"],"A differential contains all changes since the last full backup, so you only need the newest one."],
+      ["Full backup on Sunday, INCREMENTAL every other day. Restoring Thursday needs:",["Sunday full + Mon, Tue and Wed incrementals","Sunday full + Wed incremental only","Only Wednesday's incremental","Just the Sunday full"],"Each incremental only holds changes since the previous backup, so you need the whole chain."],
+      ["Which provides SHORT-term power to ride out a brief outage or bridge to a generator?",["UPS","Generator","PDU","Dual NICs"],"A UPS gives seconds to minutes of battery power. A generator covers long outages."],
+      ["A discussion-based walk-through of a disaster scenario with no systems touched is a:",["Tabletop exercise","Failover test","Parallel processing test","Live simulation"],"Tabletop exercises are cheap and useful for checking roles and plans."],
+      ["Average time between failures of a component is:",["MTBF","MTTR","RTO","RPO"],"Mean Time Between Failures measures reliability. MTTR is the mean time to repair."]
+    ]}
+]},
+{ name:"Security Operations", w:28, c:"#ff9600", d:"#cc7800", t:"#cc7800", lessons:[
+  { id:"so1", t:"Hardening & Mobile",
+    intro:["Hardening: disable unused services, change defaults, patch, use a secure baseline","WPA3 uses SAE instead of the PSK handshake, which blocks offline dictionary attacks","BYOD = employee-owned. COPE = corporate-owned, personal use OK. CYOD = choose from an approved list."],
+    pairs:[["BYOD","Employee owns device"],["COPE","Company owns, personal use OK"],["CYOD","Pick from approved list"],["MDM","Manages mobile devices centrally"],["WPA3","Wi-Fi security using SAE"]],
+    qs:[
+      ["Which wireless security protocol uses SAE to protect against offline dictionary attacks?",["WPA3","WPA2-PSK","WEP","WPS"],"Simultaneous Authentication of Equals replaces WPA2's crackable four-way PSK handshake."],
+      ["A company buys phones for employees and lets them use them personally. This model is:",["COPE","BYOD","CYOD","VDI"],"Corporate-Owned, Personally Enabled."],
+      ["Which centrally enforces passcodes and remote wipe on company phones?",["MDM","NAC","SIEM","WAF"],"Mobile Device Management enforces policy on mobile devices."],
+      ["Degaussing will NOT reliably sanitize which media?",["SSDs","Magnetic hard drives","Backup tapes","Floppy disks"],"Degaussing disrupts magnetic fields, and SSDs store data in flash memory. Shred them or use cryptographic erase."],
+      ["The FIRST step in managing secure configurations is to:",["Establish a secure baseline","Deploy patches","Run a pen test","Buy an EDR tool"],"Establish, deploy, then maintain the baseline."],
+      ["Restricting an app's functions when a device leaves a defined physical area is:",["Geofencing","Sideloading","Geotagging","Carrier unlocking"],"Geofencing triggers actions based on GPS or network location."],
+      ["A document a vendor gives you proving drives were destroyed is a:",["Certificate of destruction","Chain of custody","Legal hold","SOW"],"It provides documented proof of proper disposal, which matters for compliance."],
+      ["Changing default passwords and disabling unneeded ports are both hardening techniques. True or False?",["True","False"],"Both reduce the attack surface."]
+    ]},
+  { id:"so2", t:"Identity & Access",
+    intro:["SAML = XML-based web SSO. OAuth = authorization (delegated access). OIDC = authentication built on OAuth.","Factors: something you know, have, are, and somewhere you are","Least privilege. PAM gives just-in-time admin access and password vaulting."],
+    pairs:[["SAML","XML web SSO"],["OAuth","Delegated authorization"],["OIDC","Authentication on top of OAuth"],["RBAC","Access by job role"],["MAC","Access by labels/clearance"]],
+    qs:[
+      ["'Log in with Google' on a third-party site, which proves WHO you are, typically uses:",["OpenID Connect","Kerberos","RADIUS","TACACS+"],"OIDC adds authentication on top of OAuth 2.0."],
+      ["Letting a printing app access your Google Photos WITHOUT giving it your password uses:",["OAuth","LDAP","TACACS+","NTLM"],"OAuth delegates authorization with tokens, not credentials."],
+      ["Which is an XML-based standard used for enterprise web single sign-on?",["SAML","OAuth","JSON Web Key","SNMP"],"SAML passes authentication and authorization assertions between an IdP and a service provider."],
+      ["Password + security question is how many authentication FACTORS?",["One","Two","Three","Zero"],"Both are something you know. That's two items but only one factor."],
+      ["Smart card + PIN is:",["Two factors (have + know)","One factor","Three factors","Biometric authentication"],"Different categories make it real MFA."],
+      ["Access based on a user's job title (e.g., 'Nurse') is:",["Role-based access control","Mandatory access control","Discretionary access control","Time-of-day restriction"],"RBAC assigns permissions to roles, and users get roles."],
+      ["Access decided by labels and clearance levels (Secret, Top Secret) is:",["Mandatory access control","Discretionary access control","Role-based","Attribute-based"],"With MAC, the OS enforces labels and users can't change them."],
+      ["Granting admin rights only for a 1-hour maintenance window, then revoking them automatically, is:",["Just-in-time permissions","Federation","Attestation","Discretionary access"],"JIT access is a PAM feature that leaves no standing privileges to steal."]
+    ]},
+  { id:"so3", t:"Monitoring & Email Security",
+    intro:["SIEM = collect, correlate and alert on logs from everywhere","SPF = which servers may send. DKIM = signature on the message. DMARC = what to do on failure, plus reports.","EDR = endpoint detection and response. FIM = alerts on changes to critical files."],
+    pairs:[["SIEM","Correlates logs into alerts"],["SPF","Authorized sending servers"],["DKIM","Signs email"],["DMARC","Policy + reporting for failures"],["FIM","Detects file changes"]],
+    qs:[
+      ["Which tool aggregates and CORRELATES logs from many sources into alerts?",["SIEM","DLP","NAC","WAF"],"Security Information and Event Management centralizes logs for analysis."],
+      ["A DNS record listing which mail servers may send email for your domain is:",["SPF","DKIM","DMARC","DNSSEC"],"Sender Policy Framework is published as a DNS TXT record."],
+      ["Which adds a cryptographic signature to outgoing email so receivers can verify it wasn't altered?",["DKIM","SPF","DMARC","MX record"],"DomainKeys Identified Mail signs the message headers and body."],
+      ["Which tells receiving servers what to do (quarantine/reject) when SPF/DKIM fail, and sends reports?",["DMARC","SPF","DKIM","DNSSEC"],"DMARC builds a policy and reporting layer on top of SPF and DKIM."],
+      ["A tool that alerts when C:\\Windows\\System32 files are changed is:",["File integrity monitoring","DLP","NetFlow","A honeypot"],"FIM compares file hashes to a known-good baseline."],
+      ["Which records traffic METADATA (source, destination, ports, bytes) rather than full packets?",["NetFlow","Packet capture","SIEM","DLP"],"NetFlow shows who talked to whom and how much, without the payloads."],
+      ["Which standard enables automated, consistent vulnerability and configuration checks across tools?",["SCAP","SNMP","SAML","SASE"],"The Security Content Automation Protocol standardizes checklists and results."],
+      ["Tuning SIEM alert rules mainly aims to reduce false positives. True or False?",["True","False"],"Alert fatigue makes analysts miss real attacks."]
+    ]},
+  { id:"so4", t:"Vulnerability Management",
+    intro:["CVE = the vulnerability's ID. CVSS = its severity score from 0 to 10.","False positive = flagged but not real. False negative = real but missed (worse).","Credentialed scans see deeper. Rescan to validate a fix."],
+    pairs:[["CVE","Vulnerability ID"],["CVSS","Severity score 0-10"],["False positive","Alert, no real issue"],["False negative","Real issue, no alert"],["Fuzzing","Random input testing"]],
+    qs:[
+      ["CVE-2026-12345 is an example of a:",["Vulnerability identifier","Severity score","Patch number","Exploit kit"],"CVE gives each vulnerability a unique ID. CVSS scores how severe it is."],
+      ["A CVSS base score of 9.8 indicates:",["Critical severity","Low severity","A false positive","A patched vulnerability"],"9.0–10.0 is Critical, 7.0–8.9 High, 4.0–6.9 Medium, and 0.1–3.9 Low."],
+      ["A scanner reports a vulnerability that doesn't actually exist. This is a:",["False positive","False negative","True positive","True negative"],"It's a false alarm. It wastes time but isn't dangerous."],
+      ["Which scanner result is MOST dangerous?",["False negative","False positive","True positive","True negative"],"A real vulnerability goes unnoticed and unfixed."],
+      ["A scan that logs into hosts with an account to check installed software and configs is:",["Credentialed","Non-credentialed","Passive","External only"],"Credentialed scans see much more and produce fewer false positives."],
+      ["Analyzing source code for flaws WITHOUT running it is:",["Static analysis (SAST)","Dynamic analysis (DAST)","Fuzzing","Pen testing"],"Static analysis reads the code. Dynamic analysis tests it while it runs."],
+      ["Sending random, malformed input to an app to make it crash is:",["Fuzzing","Static analysis","Code signing","Sandboxing"],"Fuzzing finds input-handling bugs like buffer overflows."],
+      ["After patching, how do you VALIDATE the fix?",["Rescan","Close the ticket","Buy cyber insurance","Run a tabletop exercise"],"A rescan or verification confirms the vulnerability is really gone."]
+    ]},
+  { id:"so5", t:"Incident Response & Forensics",
+    intro:["IR process: Preparation → Detection → Analysis → Containment → Eradication → Recovery → Lessons learned","Order of volatility: CPU cache/registers → RAM → swap/temp → disk → remote logs → backups","Chain of custody documents everyone who handled the evidence"],
+    pairs:[["Containment","Stop the spread"],["Eradication","Remove the threat"],["Recovery","Restore to normal"],["Chain of custody","Evidence handling log"],["Legal hold","Preserve data for litigation"]],
+    qs:[
+      ["Which incident response phase comes right AFTER containment?",["Eradication","Recovery","Lessons learned","Detection"],"Contain the spread, eradicate the threat, then recover."],
+      ["Isolating an infected laptop from the network is part of which phase?",["Containment","Eradication","Preparation","Recovery"],"Containment limits the damage and stops the spread."],
+      ["Which should a forensic investigator collect FIRST?",["RAM contents","Hard drive image","Backup tapes","Remote syslog server data"],"Follow the order of volatility. RAM disappears when the power goes off."],
+      ["The document recording who handled evidence, when, and why, is the:",["Chain of custody","Legal hold","Rules of engagement","SOW"],"Without it, evidence may not hold up in court."],
+      ["A lawyer orders that all emails related to a lawsuit must be preserved and not deleted. This is a:",["Legal hold","Chain of custody","Data retention policy","Right to be forgotten"],"A legal hold suspends normal deletion for the relevant data."],
+      ["Why hash a forensic disk image?",["To prove it hasn't been altered","To encrypt it","To compress it","To find malware"],"Matching hashes prove the image is identical to the original and unchanged."],
+      ["Proactively searching your network for threats that haven't triggered alerts is:",["Threat hunting","Incident response","Vulnerability scanning","Tabletop exercise"],"Threat hunting assumes a breach and goes looking for it."],
+      ["The 'lessons learned' meeting should happen soon after the incident, while details are fresh. True or False?",["True","False"],"Holding it promptly improves the process for next time."]
+    ]}
+]},
+{ name:"Security Program Management", w:20, c:"#ff4b8b", d:"#d13a70", t:"#d13a70", lessons:[
+  { id:"pm1", t:"Governance & Roles",
+    intro:["Policy = high-level why. Standard = mandatory specifics. Procedure = step-by-step how. Guideline = optional advice.","Data owner is accountable. Custodian implements protection day to day.","GDPR: the controller decides why data is processed. The processor does the processing for them."],
+    pairs:[["Policy","High-level intent"],["Standard","Mandatory specifics"],["Procedure","Step-by-step how-to"],["Guideline","Optional recommendation"],["Data owner","Accountable for the data"]],
+    qs:[
+      ["'Passwords must be at least 14 characters' is best described as a:",["Standard","Policy","Guideline","Procedure"],"Standards are mandatory, specific requirements that support a policy."],
+      ["A document of rules employees agree to for using company computers and internet is the:",["Acceptable Use Policy","SLA","NDA","Incident response plan"],"The AUP defines what you can and can't do with company resources."],
+      ["Step-by-step instructions for onboarding a new employee's account are a:",["Procedure","Policy","Standard","Guideline"],"Procedures describe exactly how to do a task."],
+      ["Who is ultimately ACCOUNTABLE for a data set's classification and protection?",["Data owner","Data custodian","Data processor","Help desk"],"The owner, usually a senior leader, is accountable. The custodian handles the technical work."],
+      ["Under GDPR, a payroll company processing data on YOUR company's behalf is the:",["Processor","Controller","Owner","Subject"],"The controller (your company) decides the purpose. The processor acts on its instructions."],
+      ["In change management, the plan to undo a change if it fails is the:",["Backout plan","Impact analysis","Maintenance window","Test results"],"Always have a way back before you make a change."],
+      ["Under GDPR, a person asking a company to delete their personal data is exercising the:",["Right to be forgotten","Right to audit","Legal hold","Data sovereignty"],"It's also called the right to erasure."],
+      ["Guidelines are mandatory requirements that must always be followed. True or False?",["False","True"],"Guidelines are recommendations. Standards and policies are mandatory."]
+    ]},
+  { id:"pm2", t:"Risk Math & Strategy",
+    intro:["SLE = Asset Value × Exposure Factor","ALE = SLE × ARO (Annualized Rate of Occurrence)","Strategies: Transfer, Accept, Avoid, Mitigate"],
+    pairs:[["SLE","AV × EF"],["ALE","SLE × ARO"],["Transfer","Insurance / outsourcing"],["Avoid","Stop the risky activity"],["Residual risk","Risk left after controls"]],
+    qs:[
+      ["An asset worth $100,000 loses 25% of its value per incident. What is the SLE?",["$25,000","$100,000","$4,000","$125,000"],"SLE = AV × EF = $100,000 × 0.25 = $25,000."],
+      ["SLE is $25,000 and the incident happens once every 2 years (ARO 0.5). What is the ALE?",["$12,500","$50,000","$25,000","$2,500"],"ALE = SLE × ARO = $25,000 × 0.5 = $12,500."],
+      ["A server worth $40,000 is fully destroyed (EF 100%) by floods expected 0.1 times a year. ALE?",["$4,000","$40,000","$400","$400,000"],"SLE = $40,000 × 1.0 = $40,000, and ALE = $40,000 × 0.1 = $4,000."],
+      ["Buying cyber insurance is which risk strategy?",["Transfer","Accept","Avoid","Mitigate"],"It shifts the financial impact to a third party."],
+      ["Shutting down a risky legacy service entirely is which strategy?",["Avoid","Transfer","Accept","Mitigate"],"Avoidance means stopping the activity that creates the risk."],
+      ["The risk remaining AFTER controls are applied is:",["Residual risk","Inherent risk","Risk appetite","Exposure factor"],"Inherent risk is before controls. Residual risk is what's left after them."],
+      ["A document listing identified risks, their owners, likelihood, impact and status is the:",["Risk register","BIA","SOW","AUP"],"The risk register is the central tracking tool for risk management."],
+      ["Using High/Medium/Low ratings instead of dollar amounts is qualitative risk analysis. True or False?",["True","False"],"Quantitative uses numbers like SLE and ALE. Qualitative uses relative ratings."]
+    ]},
+  { id:"pm3", t:"Vendors, Audits & Pen Tests",
+    intro:["SLA = performance and uptime. SOW = specific deliverables. MSA = umbrella terms. NDA = confidentiality.","Pen test environments: Known (white box), Partially known (gray box), Unknown (black box)","Rules of engagement define the scope, timing and limits of a test"],
+    pairs:[["SLA","Uptime/performance terms"],["SOW","Specific project deliverables"],["MOU","Informal statement of intent"],["NDA","Keep information confidential"],["Known environment","White-box pen test"]],
+    qs:[
+      ["A contract guaranteeing 99.9% uptime with penalties if missed is an:",["SLA","MOU","NDA","BPA"],"A Service Level Agreement defines measurable performance."],
+      ["A document detailing the exact deliverables, timeline and cost of one specific project is the:",["SOW","MSA","MOU","AUP"],"A Statement of Work is project-specific and often falls under an MSA."],
+      ["An informal agreement stating two organizations' intent to work together, usually not legally binding, is an:",["MOU","SLA","SOW","MSA"],"A Memorandum of Understanding states intent."],
+      ["A clause allowing you to inspect a vendor's security controls is a:",["Right-to-audit clause","Non-compete","Legal hold","Indemnity cap"],"Right-to-audit clauses are key in third-party risk management."],
+      ["A pen tester given NO information about the target environment is doing a(n):",["Unknown environment test","Known environment test","Partially known test","Tabletop exercise"],"This is the old 'black box' test. It simulates an outside attacker."],
+      ["The document defining scope, allowed techniques, testing hours and contacts for a pen test is the:",["Rules of engagement","SLA","Chain of custody","Risk register"],"The ROE keeps the test legal and safe."],
+      ["Gathering info from public websites and social media WITHOUT touching the target's systems is:",["Passive reconnaissance","Active reconnaissance","Exploitation","Pivoting"],"Passive recon (OSINT) never interacts with the target directly."],
+      ["In exercises, the team that defends the network is the:",["Blue team","Red team","White team","Purple team"],"Red attacks, blue defends, purple combines both, and white referees."]
+    ]}
+]}
+];
+
+/* ---------- index ---------- */
+const LESSONS=[], ALLQ={};
+UNITS.forEach((u,ui)=>{ u.n=ui+1; u.lessons.forEach((l,li)=>{ l.u=u; l.li=li; LESSONS.push(l);
+  l.qids=l.qs.map((x,i)=>{ const id=l.id+"."+i; ALLQ[id]={id,q:x[0],opts:x[1],e:x[2],l,u}; return id; }); }); });
+const BYID=Object.fromEntries(LESSONS.map(l=>[l.id,l]));
+const TOTALQ=Object.keys(ALLQ).length;
+
+/* ---------- utils ---------- */
+const DAY=864e5, REGEN=2*36e5, MAXH=5, IV=[0,1,3,7,16,35];
+const app=document.getElementById("app");
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const pad=n=>String(n).padStart(2,"0");
+const dayKey=(d=new Date())=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const ydayKey=()=>{const d=new Date();d.setDate(d.getDate()-1);return dayKey(d)};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const uvars=u=>`--uc:${u.c};--ud:${u.d};--uc2:${u.t}`;
+function fmtDur(ms){ms=Math.max(0,ms);const m=Math.floor(ms/6e4),s=Math.floor(ms%6e4/1e3);return m+":"+pad(s)}
+function fmtHM(ms){const h=Math.floor(ms/36e5),m=Math.ceil(ms%36e5/6e4);return h?`${h}h ${m}m`:`${m}m`}
+
+/* ---------- state + persistence ---------- */
+const LS_KEY="secplus-quest-v1";
+function defState(){return{v:1,xp:0,streak:0,longest:0,lastGoalDay:"",days:{},hearts:MAXH,heartsAt:Date.now(),lessons:{},srs:{},exams:[],settings:{goal:30,examDate:"",sound:true},updatedAt:0}}
+function normalize(o){const s=Object.assign(defState(),o||{});s.settings=Object.assign(defState().settings,(o&&o.settings)||{});
+  ["days","lessons","srs"].forEach(k=>{if(!s[k]||typeof s[k]!=="object")s[k]={}}); if(!Array.isArray(s.exams))s.exams=[];
+  if(typeof s.hearts!=="number")s.hearts=MAXH; return s}
+let S=defState();
+try{const raw=localStorage.getItem(LS_KEY); if(raw)S=normalize(JSON.parse(raw))}catch(e){}
+function lsSet(){try{localStorage.setItem(LS_KEY,JSON.stringify(S))}catch(e){}}
+
+const cloud={ref:null,status:"local",writing:false,pending:false,timer:null,retried:false};
+function save(){S.updatedAt=Date.now(); lsSet(); pushWidget(); if(cloud.ref){clearTimeout(cloud.timer); cloud.timer=setTimeout(pushCloud,1200)}}
+/* Android app: hand a small summary to the native home-screen widget */
+function pushWidget(){ try{ const B=window.AndroidBridge; if(!B||!B.saveState)return; const t=dayKey();
+  B.saveState(JSON.stringify({streak:S.streak,lastGoalDay:S.lastGoalDay,todayKey:t,todayXP:S.days[t]||0,goal:S.settings.goal,
+    dues:Object.keys(S.srs).filter(id=>ALLQ[id]).map(id=>S.srs[id].d),hearts:S.hearts,heartsAt:S.heartsAt,xp:S.xp,
+    examDate:S.settings.examDate,lessonsDone:LESSONS.filter(isDone).length,lessons:LESSONS.length})) }catch(e){} }
+async function pushCloud(){
+  if(!cloud.ref)return;
+  if(cloud.writing){cloud.pending=true;return}
+  cloud.writing=true;
+  try{ await cloud.ref.set({v:1,updatedAt:S.updatedAt,state:JSON.parse(JSON.stringify(S))}); cloud.status="synced"; cloud.retried=false; }
+  catch(e){ const c=e&&e.code;
+    if((c==="unavailable"||c==="resource_exhausted")&&!cloud.retried){cloud.retried=true;cloud.pending=true;await sleep(2000+Math.random()*2000)}
+    else{cloud.ref=null;cloud.status="local"} }
+  cloud.writing=false; refreshSync();
+  if(cloud.pending&&cloud.ref){cloud.pending=false;pushCloud()}
+}
+async function initCloud(){
+  if(!(window.claude&&typeof window.claude.use==="function"))return;
+  try{
+    const [db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")]);
+    if(!db||!user)return;
+    const id=await user.id(); if(!id)return;
+    const ref=db.collection("data/users/"+id).doc("progress");
+    cloud.status="connecting"; refreshSync();
+    const snap=await ref.get();
+    cloud.ref=ref; cloud.status="synced";
+    const rs=snap.exists?(snap.data()||{}).state:null;
+    if(rs&&(rs.updatedAt||0)>(S.updatedAt||0)){
+      S=normalize(JSON.parse(JSON.stringify(rs))); lsSet(); regen();
+      if(view!=="session"&&view!=="result")render();
+    }else if(S.updatedAt&&(!rs||(S.updatedAt>(rs.updatedAt||0)))){ pushCloud(); }
+    refreshSync();
+  }catch(e){cloud.ref=null;cloud.status="local";refreshSync()}
+}
+function refreshSync(){const el=document.getElementById("sync"); if(el)el.outerHTML=syncHTML()}
+function syncHTML(){const ok=cloud.status==="synced";return `<div id="sync" class="sync ${ok?"ok":""}"><i></i>${ok?"Progress synced to your Claude account":cloud.status==="connecting"?"Connecting…":"Progress saved on this device"}</div>`}
+
+/* ---------- game rules ---------- */
+function regen(){ if(S.hearts>=MAXH){S.hearts=MAXH;return false}
+  const n=Math.floor((Date.now()-S.heartsAt)/REGEN); if(n>0){S.hearts=Math.min(MAXH,S.hearts+n);S.heartsAt+=n*REGEN;return true} return false }
+function loseHeart(){ if(S.hearts>=MAXH)S.heartsAt=Date.now(); S.hearts=Math.max(0,S.hearts-1) }
+function nextHeartIn(){return REGEN-(Date.now()-S.heartsAt)}
+function addXP(n){ const t=dayKey(); S.xp+=n; S.days[t]=(S.days[t]||0)+n;
+  const ks=Object.keys(S.days).sort(); while(ks.length>60)delete S.days[ks.shift()];
+  if(S.days[t]>=S.settings.goal&&S.lastGoalDay!==t){ S.streak=S.lastGoalDay===ydayKey()?S.streak+1:1; S.lastGoalDay=t; S.longest=Math.max(S.longest,S.streak); return true }
+  return false }
+function curStreak(){return (S.lastGoalDay===dayKey()||S.lastGoalDay===ydayKey())?S.streak:0}
+function grade(id,ok){ const r=S.srs[id]||{b:0,d:0,s:0,c:0}; r.s++; if(ok){r.c++;r.b=Math.min(5,r.b+1)}else r.b=0;
+  r.d=Date.now()+(ok?IV[r.b]*DAY:10*6e4); S.srs[id]=r }
+const box=id=>(S.srs[id]&&S.srs[id].b)||0;
+const mastery=ids=>ids.length?ids.reduce((a,id)=>a+Math.min(box(id),4)/4,0)/ids.length:0;
+const unitQids=u=>u.lessons.flatMap(l=>l.qids);
+function readiness(){return UNITS.reduce((a,u)=>a+u.w*mastery(unitQids(u)),0)/100}
+const isDone=l=>!!(S.lessons[l.id]&&S.lessons[l.id].done);
+const isUnlocked=l=>l.li===0||isDone(l.u.lessons[l.li-1]);
+function currentLesson(){return LESSONS.find(l=>isUnlocked(l)&&!isDone(l))||null}
+function dueIds(){const now=Date.now();return Object.keys(S.srs).filter(id=>ALLQ[id]&&S.srs[id].d<=now).sort((a,b)=>S.srs[a].d-S.srs[b].d)}
+function daysToExam(){ if(!S.settings.examDate)return null; const [y,m,d]=S.settings.examDate.split("-").map(Number);
+  const t=new Date(y,m-1,d); const now=new Date(); now.setHours(0,0,0,0); return Math.round((t-now)/DAY) }
+
+/* ---------- sound ---------- */
+let actx=null;
+function sfx(kind){ if(!S.settings.sound)return;
+  try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    const N={good:[660,990],bad:[200,160],done:[523,659,784,1047],tap:[880],pair:[740,988]}[kind]||[880];
+    N.forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.type=kind==="bad"?"triangle":"sine";o.frequency.value=f;
+      const t=actx.currentTime+i*0.085;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(kind==="tap"?0.04:0.13,t+0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+(kind==="done"?0.3:0.18));o.connect(g);g.connect(actx.destination);o.start(t);o.stop(t+0.32)}) }catch(e){}
+  if(kind==="bad"){try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}} }
+
+/* ---------- icons ---------- */
+const IC={
+  star:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2.8l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 16.8l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  lock:'<svg viewBox="0 0 24 24" fill="#afafaf"><path d="M7 10V7.5a5 5 0 0110 0V10h.5A1.5 1.5 0 0119 11.5v8a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 015 19.5v-8A1.5 1.5 0 016.5 10zm2.5 0h5V7.5a2.5 2.5 0 00-5 0z"/></svg>'
+};
+
+/* ---------- views ---------- */
+let view="learn", sess=null, overlay=null;
+
+function header(){ const st=curStreak();
+  return `<header class="top"><div class="chip">🛡️ Sec+ <small>SY0-701</small></div>
+  <div class="stats"><button class="stat ${st?"fire":"dim"}" data-act="streakInfo"><span class="em">🔥</span>${st}</button>
+  <button class="stat xp" data-act="xpInfo">⚡${S.xp}</button><button class="stat heart" data-act="hearts">❤️${S.hearts}</button></div></header>` }
+function nav(){ const t=[["learn","🏠","Learn"],["review","🧠","Review"],["exam","📝","Exam"],["stats","📊","Stats"]];
+  return `<nav class="nav"><div class="nav-in">${t.map(([k,i,l])=>`<button class="${view===k?"on":""}" data-act="go" data-v="${k}"><span class="ico">${i}</span>${l}</button>`).join("")}</div></nav>` }
+
+function learnView(){
+  const today=S.days[dayKey()]||0, g=S.settings.goal, dte=daysToExam(), cur=currentLesson();
+  let h=`<div class="card"><div class="row"><div><h3>Daily goal</h3><div class="muted">${Math.min(today,g)} / ${g} XP today</div></div>
+    <div style="font-size:34px">${today>=g?"🏆":"🎯"}</div></div><div class="pbar"><i style="width:${Math.min(100,today/g*100)}%"></i></div>
+    <div class="row" style="margin-top:12px"><span class="muted">${dte==null?"No exam date set":dte>=0?`📅 <b>${dte}</b> days to exam`:"Exam date passed"}</span>
+    <button class="link" data-act="go" data-v="stats">${dte==null?"Set date":"Edit"}</button></div></div>`;
+  if(dueIds().length) h+=`<button class="btn blue" data-act="startReview" style="margin-bottom:8px">🧠 Review ${dueIds().length} due card${dueIds().length>1?"s":""}</button>`;
+  UNITS.forEach(u=>{
+    const done=u.lessons.filter(isDone).length;
+    h+=`<div class="unit" style="${uvars(u)}"><div class="k">Unit ${u.n} · ${u.w}% of exam</div><div class="n">${esc(u.name)}</div><div class="w">${done}/${u.lessons.length} lessons complete</div></div><div class="path">`;
+    const offs=[0,-52,-78,-52,0,52,78,52];
+    u.lessons.forEach((l,i)=>{
+      const st=isDone(l)?"done":isUnlocked(l)?"open":"locked", isCur=cur===l, rec=S.lessons[l.id];
+      h+=`<div class="stop" style="transform:translateX(${offs[(i+(u.n%2?0:4))%8]}px);${uvars(u)}">
+        ${isCur?`<div class="bubble">START</div>`:""}
+        <button class="node ${st} ${isCur?"cur":""}" data-act="lessonSheet" data-v="${l.id}" aria-label="${esc(l.t)}">${st==="done"?IC.check:st==="locked"?IC.lock:IC.star}
+        ${rec&&rec.done>1?`<span class="crowns">×${rec.done}</span>`:""}</button><div class="slabel">${esc(l.t)}</div></div>` });
+    h+=`</div>`; });
+  h+=`<div class="card center" style="margin-top:26px"><h3>🏁 Course goal</h3><div class="muted">Finish all ${LESSONS.length} lessons, then score 85%+ on practice exams before you book the real one.</div></div>`;
+  return h }
+
+function reviewView(){
+  const due=dueIds().length, seen=Object.keys(S.srs).filter(id=>ALLQ[id]).length, mast=Object.keys(ALLQ).filter(id=>box(id)>=4).length;
+  let h=`<div class="card hero"><div class="e">🧠</div><h3>Spaced review</h3><div class="muted">Questions you miss come back soon. Ones you know come back later (1, 3, 7, 16, then 35 days).</div>
+    <div class="grid2" style="margin:16px 0"><div class="mini"><div class="v">${due}</div><div class="l">due now</div></div><div class="mini"><div class="v">${mast}/${TOTALQ}</div><div class="l">mastered</div></div></div>
+    <button class="btn blue" data-act="startReview" ${seen?"":"disabled"}>${due?`Review ${Math.min(due,10)} cards`:"Practice weak spots"}</button>
+    <div class="muted" style="margin-top:10px">${seen?"Practice never costs hearts and earns one back.":"Finish a lesson first to unlock review."}</div></div>
+    <h2 class="sec">Drill a domain</h2>`;
+  UNITS.forEach(u=>{const m=Math.round(mastery(unitQids(u))*100);
+    h+=`<button class="drow" data-act="startDomain" data-v="${u.n}" style="${uvars(u)}"><span class="sw"></span><span><div class="t">${u.n}. ${esc(u.name)}</div><div class="s">${u.w}% of exam · 10 random questions</div></span><span class="pct">${m}%</span></button>`});
+  return h }
+
+function examView(){
+  let h=`<div class="card hero"><div class="e">📝</div><h3>Practice exam</h3><div class="muted">30 questions in 35 minutes, weighted like the real SY0-701 domains. You won't see answers until the end.</div>
+  <div class="muted" style="margin-top:8px">The real exam has up to 90 questions in 90 minutes, and you need 750 on a 100–900 scale to pass. It also includes performance-based questions.</div>
+  <div style="margin-top:16px"><button class="btn" data-act="startExam">Start exam</button></div></div>`;
+  if(S.exams.length){ h+=`<h2 class="sec">Past attempts</h2>`;
+    S.exams.slice().reverse().slice(0,10).forEach(x=>{const d=new Date(x.at);
+      h+=`<div class="card row" style="padding:12px 16px"><div><b>${d.toLocaleDateString(undefined,{month:"short",day:"numeric"})}</b> <span class="muted">· ${x.ok}/${x.n}</span></div>
+      <div style="font-weight:900;font-size:20px;color:${x.pct>=85?"var(--green-d)":x.pct>=70?"var(--gold-d)":"var(--red-d)"}">${x.pct}%</div></div>`}) }
+  return h }
+
+function statsView(){
+  const r=readiness(), pct=Math.round(r*100), C=2*Math.PI*46;
+  const seenIds=Object.keys(S.srs).filter(id=>ALLQ[id]), tot=seenIds.reduce((a,id)=>a+S.srs[id].s,0), cor=seenIds.reduce((a,id)=>a+S.srs[id].c,0);
+  const dte=daysToExam(), unmast=TOTALQ-Object.keys(ALLQ).filter(id=>box(id)>=4).length;
+  let h=`<div class="card ring"><svg width="112" height="112" viewBox="0 0 112 112"><circle cx="56" cy="56" r="46" fill="none" stroke="#e5e5e5" stroke-width="12"/>
+    <circle cx="56" cy="56" r="46" fill="none" stroke="${pct>=85?"#58cc02":pct>=50?"#ffc800":"#1cb0f6"}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-r)}" transform="rotate(-90 56 56)"/>
+    <text x="56" y="63" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="24" fill="#3c3c3c">${pct}%</text></svg>
+    <div><h3>Exam readiness</h3><div class="muted">This is mastery weighted by each domain's share of the exam. A question counts as mastered after 4 correct reviews in a row, spaced out.</div></div></div>`;
+  if(dte!=null&&dte>0) h+=`<div class="card"><h3>📅 ${dte} days to go</h3><div class="muted">To master every question by exam day, aim for about <b>${Math.max(1,Math.ceil(unmast/Math.max(1,dte-7)))}</b> questions a day. That leaves the last week for practice exams.</div></div>`;
+  h+=`<div class="card"><h3>By domain</h3>`;
+  UNITS.forEach(u=>{const m=Math.round(mastery(unitQids(u))*100);h+=`<div class="dom" style="${uvars(u)}"><div class="row"><span>${u.n}. ${esc(u.name)}</span><span style="color:${u.t}">${m}%</span></div><div class="pbar"><i style="width:${m}%"></i></div></div>`});
+  h+=`</div>`;
+  const days=[...Array(7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return d}), vals=days.map(d=>S.days[dayKey(d)]||0), mx=Math.max(S.settings.goal,...vals);
+  h+=`<div class="card"><h3>This week</h3><div class="week">${days.map((d,i)=>`<div><span class="${vals[i]>=S.settings.goal?"hit":""}" style="height:${Math.max(6,vals[i]/mx*72)}px"></span><em>${"SMTWTFS"[d.getDay()]}</em></div>`).join("")}</div></div>`;
+  h+=`<div class="grid2" style="margin-bottom:14px"><div class="mini"><div class="v">⚡ ${S.xp}</div><div class="l">total XP</div></div><div class="mini"><div class="v">🔥 ${S.longest}</div><div class="l">longest streak</div></div>
+    <div class="mini"><div class="v">${LESSONS.filter(isDone).length}/${LESSONS.length}</div><div class="l">lessons done</div></div><div class="mini"><div class="v">${tot?Math.round(cor/tot*100):0}%</div><div class="l">answer accuracy</div></div></div>`;
+  h+=`<div class="card"><h3>Settings</h3>
+    <div style="margin-top:12px;font-weight:800">Exam date</div><input type="date" id="examDate" value="${esc(S.settings.examDate)}">
+    <div style="margin-top:16px;font-weight:800">Daily XP goal</div><div class="seg">${[10,20,30,50].map(g=>`<button class="${S.settings.goal===g?"on":""}" data-act="goal" data-v="${g}">${g}</button>`).join("")}</div>
+    <div class="row" style="margin-top:16px"><span style="font-weight:800">Sound effects</span><button class="toggle ${S.settings.sound?"on":""}" data-act="sound" aria-label="Sound"></button></div>
+    <div style="margin-top:16px">${syncHTML()}</div>
+    <button class="btn plain" data-act="resetAsk" style="margin-top:10px;color:var(--red-d)">Reset all progress</button></div>`;
+  return h }
+
+/* ---------- sheets ---------- */
+function openSheet(html,style){overlay={html,style:style||""};drawOverlay()}
+function closeSheet(){overlay=null;drawOverlay()}
+function drawOverlay(){let el=document.getElementById("ov");if(el)el.remove();if(!overlay)return;
+  el=document.createElement("div");el.id="ov";el.className="overlay";el.innerHTML=`<div class="sheet" style="${overlay.style}">${overlay.html}</div>`;
+  el.addEventListener("click",e=>{if(e.target===el)closeSheet()});document.body.appendChild(el)}
+
+function lessonSheet(id){ const l=BYID[id], u=l.u, rec=S.lessons[id], un=isUnlocked(l);
+  let h=`<div class="qlabel"><span class="dot"></span>Unit ${u.n} · Lesson ${l.li+1} of ${u.lessons.length}</div><h2 style="margin-top:6px">${esc(l.t)}</h2>
+    <ul>${l.intro.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`;
+  if(!un) h+=`<button class="btn" disabled>🔒 Finish "${esc(u.lessons[l.li-1].t)}" first</button>`;
+  else{ h+=rec?`<div class="muted" style="margin-bottom:14px">Completed ${rec.done}× · best ${rec.best}%</div>`:"";
+    h+=`<button class="btn" data-act="startLesson" data-v="${id}" style="background:${u.c};box-shadow:0 4px 0 ${u.d}">${rec?"Practice again +10 XP":"Start +10 XP"}</button>`;}
+  openSheet(h,uvars(u)) }
+function heartsSheet(){ regen();
+  openSheet(`<h2>❤️ ${S.hearts} / ${MAXH} hearts</h2><ul style="--uc:var(--red)"><li>You lose a heart for each wrong answer in a lesson.</li><li>One heart refills every 2 hours${S.hearts<MAXH?` (next in ${fmtHM(nextHeartIn())})`:""}.</li><li>Review and domain drills never cost hearts, and finishing one earns a heart back.</li></ul>
+  <button class="btn blue" data-act="startReview" ${Object.keys(S.srs).length?"":"disabled"}>Practice to earn a heart</button><button class="btn ghost" data-act="close">Close</button>`) }
+function noHeartsSheet(){ openSheet(`<div class="center"><div style="font-size:60px">💔</div><h2>Out of hearts</h2><div class="muted" style="margin:6px 0 18px">Next heart in ${fmtHM(nextHeartIn())}. Or practice now to earn one back.</div></div>
+  <button class="btn blue" data-act="startReview">Practice to earn a heart</button><button class="btn ghost" data-act="close">Later</button>`) }
+
+/* ---------- sessions ---------- */
+function mkQ(id){ const Q=ALLQ[id], tf=Q.opts.length===2&&Q.opts.includes("True")&&Q.opts.includes("False");
+  return {kind:"mcq",id,q:Q.q.replace(/\s*True or False\?\s*$/,""),opts:tf?["True","False"]:shuffle(Q.opts.slice()),ans:Q.opts[0],e:Q.e,tf,u:Q.u} }
+function newSess(mode,items,extra){ return Object.assign({mode,items,i:0,goal:items.length,cleared:0,ok:0,bad:0,combo:0,maxCombo:0,t0:Date.now(),state:"answer",sel:null,answers:[]},extra||{}) }
+function begin(s){ closeSheet(); sess=s; view="session"; render(); window.scrollTo(0,0) }
+
+function startLesson(id){ regen(); if(S.hearts<=0){noHeartsSheet();return}
+  const l=BYID[id], qs=shuffle(l.qids.slice()).map(mkQ), items=[];
+  if(!isDone(l)) items.push({kind:"intro",l});
+  const mid=Math.min(4,qs.length); items.push(...qs.slice(0,mid),{kind:"match",pairs:l.pairs,u:l.u},...qs.slice(mid));
+  begin(newSess("lesson",items,{l})) }
+function practiceIds(pool,n){ const now=Date.now(), due=pool.filter(id=>S.srs[id]&&S.srs[id].d<=now).sort((a,b)=>S.srs[a].d-S.srs[b].d);
+  const seen=shuffle(pool.filter(id=>S.srs[id]&&!due.includes(id))).sort((a,b)=>box(a)-box(b));
+  const rest=shuffle(pool.filter(id=>!S.srs[id])); return [...due,...seen,...rest].slice(0,n) }
+function startReview(){ let pool=Object.keys(S.srs).filter(id=>ALLQ[id]);
+  if(pool.length<8){ const extra=LESSONS.filter(l=>isUnlocked(l)).flatMap(l=>l.qids); pool=[...new Set([...pool,...extra])] }
+  const ids=practiceIds(pool,10); begin(newSess("review",shuffle(ids).map(mkQ),{title:"Review"})) }
+function startDomain(n){ const u=UNITS[n-1]; begin(newSess("review",shuffle(practiceIds(unitQids(u),10)).map(mkQ),{title:u.name})) }
+function startExam(){ const per=[4,7,5,8,6], ids=[]; UNITS.forEach((u,i)=>ids.push(...shuffle(unitQids(u).slice()).slice(0,per[i])));
+  const s=newSess("exam",shuffle(ids).map(mkQ),{deadline:Date.now()+35*6e4}); begin(s);
+  s.tick=setInterval(()=>{ const el=document.getElementById("timer"), left=s.deadline-Date.now(); if(el){el.textContent=fmtDur(left);el.classList.toggle("low",left<5*6e4)} if(left<=0&&sess===s)finish() },1000) }
+
+function renderSession(){
+  const s=sess, it=s.items[s.i];
+  const pct=s.mode==="exam"?Math.round(100*s.i/s.items.length):Math.round(100*s.cleared/s.goal);
+  const right=s.mode==="lesson"?`<span class="hp">❤️ ${S.hearts}</span>`:s.mode==="exam"?`<span class="timer" id="timer">${fmtDur(s.deadline-Date.now())}</span>`:`<span class="tag">PRACTICE</span>`;
+  let body="", foot="";
+  const u=it.u||(it.l&&it.l.u)||UNITS[0];
+  if(it.kind==="intro"){
+    body=`<div class="qlabel"><span class="dot"></span>New lesson</div><div class="intro-title">${esc(it.l.t)}</div><div class="muted">Learn these first, then you'll be quizzed on them.</div>
+      ${it.l.intro.map((x,i)=>`<div class="intro-card"><b>${i+1}</b><span>${esc(x)}</span></div>`).join("")}`;
+    foot=`<div class="foot"><div class="foot-in"><button class="btn" data-act="next">Got it</button></div></div>`;
+  } else if(it.kind==="match"){
+    if(!s.m){ const idx=it.pairs.map((_,i)=>i); s.m={L:shuffle(idx.slice()),R:shuffle(idx.slice()),sl:null,sr:null,done:new Set(),badL:null,badR:null} }
+    const m=s.m, tile=(side,i)=>{const isL=side==="L", txt=it.pairs[i][isL?0:1], ok=m.done.has(i), sel=isL?m.sl===i:m.sr===i, bad=isL?m.badL===i:m.badR===i;
+      return `<button class="tile ${isL?"term":""} ${ok?"ok":bad?"bad":sel?"sel":""}" data-act="tile" data-v="${side}${i}" ${ok?"disabled":""}>${esc(txt)}</button>`};
+    body=`<div class="qlabel"><span class="dot"></span>Match the pairs</div><div class="qtext" style="font-size:19px">Tap a term, then its meaning</div>
+      <div class="match"><div class="mcol">${m.L.map(i=>tile("L",i)).join("")}</div><div class="mcol">${m.R.map(i=>tile("R",i)).join("")}</div></div>`;
+    foot=s.state==="feedback"?fb(true,"All matched!",""):`<div class="foot"><div class="foot-in"><button class="btn" disabled>Check</button></div></div>`;
+  } else {
+    const lock=s.state==="feedback";
+    const opt=(o,k)=>{let c=""; if(lock){ if(o===it.ans)c="good"; else if(k===s.sel)c="bad"; else c="dim" } else if(k===s.sel)c="sel";
+      return `<button class="opt ${c}" data-act="pick" data-v="${k}" ${lock?"disabled":""}><span class="k">${k+1}</span><span>${esc(o)}</span></button>`};
+    const lbl=s.mode==="exam"?`Question ${s.i+1} of ${s.items.length}`:it.tf?"True or false?":"Select the correct answer";
+    body=`<div class="qlabel"><span class="dot"></span>${lbl}<span style="color:var(--sub);font-weight:800;text-transform:none;letter-spacing:0">· D${u.n}</span></div>
+      <div class="qtext">${esc(it.q)}</div>${it.tf?`<div class="tfrow">${it.opts.map(opt).join("")}</div>`:it.opts.map(opt).join("")}`;
+    if(s.mode==="exam") foot=`<div class="foot"><div class="foot-in"><button class="btn blue" data-act="examNext" ${s.sel==null?"disabled":""}>${s.i===s.items.length-1?"Finish":"Next"}</button></div></div>`;
+    else if(lock) foot=s.last?fb(true,praise(),it.e):fb(false,"Correct answer:",it.e,it.ans);
+    else foot=`<div class="foot"><div class="foot-in"><button class="btn" data-act="check" ${s.sel==null?"disabled":""}>Check</button></div></div>`;
+  }
+  app.innerHTML=`<div class="lesson" style="${uvars(u)}"><div class="lhead"><button class="x" data-act="quit" aria-label="Quit">✕</button><div class="bar"><i style="width:${pct}%"></i></div>${right}</div><div class="lbody">${body}</div>${foot}</div>`;
+}
+const PRAISE=["Nicely done!","Correct!","You got it!","Great job!","Awesome!","Exactly right!"];
+function praise(){const p=PRAISE[Math.floor(Math.random()*PRAISE.length)]; return sess.combo>=3?`${p}<span class="combo">🔥 ${sess.combo} in a row</span>`:p}
+function fb(ok,title,text,ans){ return `<div class="foot ${ok?"good":"bad"}"><div class="foot-in"><div class="fb"><div class="fb-ic">${ok?"✓":"✕"}</div><div>
+  <div class="fb-title">${title}</div>${ans?`<div class="fb-ans">${esc(ans)}</div>`:""}${text?`<div class="fb-text">${esc(text)}</div>`:""}</div></div>
+  <button class="btn ${ok?"":"red"}" data-act="next">Continue</button></div></div>` }
+
+function pick(k){ if(!sess||sess.state!=="answer")return; sess.sel=k; sfx("tap"); renderSession() }
+function check(){ const s=sess, it=s.items[s.i]; if(!s||s.sel==null||s.state!=="answer"||it.kind!=="mcq")return;
+  const ok=it.opts[s.sel]===it.ans; s.last=ok; s.state="feedback";
+  if(!it.re){ grade(it.id,ok); ok?s.ok++:s.bad++ }
+  if(ok){ s.combo++; s.maxCombo=Math.max(s.maxCombo,s.combo); s.cleared++; sfx("good") }
+  else{ s.combo=0; sfx("bad"); if(s.mode==="lesson")loseHeart();
+    if(!it.re) s.items.push(Object.assign(mkQ(it.id),{re:true})); else s.cleared++ }
+  save(); renderSession() }
+function next(){ const s=sess, it=s.items[s.i]; if(!s)return;
+  if(it.kind==="intro"){ s.cleared++ }
+  if(it.kind==="mcq"&&s.state!=="feedback")return;
+  if(it.kind==="match"&&s.state!=="feedback")return;
+  if(s.mode==="lesson"&&S.hearts<=0){ outOfHearts(); return }
+  s.i++; s.sel=null; s.state="answer"; s.m=null;
+  if(s.i>=s.items.length) finish(); else { renderSession(); window.scrollTo(0,0) } }
+function tile(v){ const s=sess, m=s.m, it=s.items[s.i]; if(!m||s.state!=="answer")return;
+  const side=v[0], i=+v.slice(1); if(m.done.has(i))return;
+  if(side==="L")m.sl=m.sl===i?null:i; else m.sr=m.sr===i?null:i;
+  m.badL=m.badR=null;
+  if(m.sl!=null&&m.sr!=null){
+    if(m.sl===m.sr){ m.done.add(m.sl); sfx("pair") } else { m.badL=m.sl; m.badR=m.sr; sfx("bad"); const bl=m.badL,br=m.badR;
+      setTimeout(()=>{ if(sess===s&&s.m===m&&m.badL===bl&&m.badR===br){m.badL=m.badR=null;renderSession()} },600) }
+    m.sl=m.sr=null;
+    if(m.done.size===it.pairs.length){ s.state="feedback"; s.last=true; s.cleared++; setTimeout(()=>sfx("good"),120) }
+  } else sfx("tap");
+  renderSession() }
+function examNext(){ const s=sess, it=s.items[s.i]; if(s.sel==null)return;
+  const ok=it.opts[s.sel]===it.ans; grade(it.id,ok); ok?s.ok++:s.bad++; s.answers.push({id:it.id,chosen:it.opts[s.sel],ok,u:it.u.n});
+  s.sel=null; s.i++; save(); if(s.i>=s.items.length)finish(); else { renderSession(); window.scrollTo(0,0) } }
+function outOfHearts(){ app.innerHTML=`<div class="result"><div class="big">💔</div><h1 style="color:var(--red-d)">Out of hearts</h1>
+  <div class="muted">Wrong answers cost hearts in lessons. Next heart in ${fmtHM(nextHeartIn())}.<br>Practice mode is free and earns a heart back.</div>
+  <div style="margin-top:auto"><button class="btn blue" data-act="startReview">Practice to earn a heart</button><button class="btn ghost" data-act="home">End lesson</button></div></div>`;
+  view="result"; sess=null }
+
+function finish(){ const s=sess; if(!s)return; clearInterval(s.tick); overlay=null; drawOverlay();
+  const graded=s.ok+s.bad, acc=graded?Math.round(s.ok/graded*100):100; let xp=0;
+  s.acc=acc; s.time=Date.now()-s.t0;
+  if(s.mode==="lesson"){ xp=10+(s.bad===0?5:0); const rec=S.lessons[s.l.id]||{done:0,best:0}; rec.done++; rec.best=Math.max(rec.best,acc); S.lessons[s.l.id]=rec }
+  else if(s.mode==="review"){ xp=5+Math.round(s.ok/2); if(S.hearts<MAXH){ S.hearts++; s.heart=true } }
+  else { xp=s.ok; const n=s.items.length, by={}; s.answers.forEach(a=>{by[a.u]=by[a.u]||{ok:0,n:0};by[a.u].n++;if(a.ok)by[a.u].ok++});
+    s.by=by; s.pct=Math.round(s.ok/n*100); S.exams.push({at:Date.now(),ok:s.ok,n,pct:s.pct}); if(S.exams.length>50)S.exams.shift() }
+  s.xp=xp; s.goalHit=addXP(xp); save(); sess=null; view="result"; renderResult(s); sfx("done") }
+
+function confetti(){ const cs=["#58cc02","#1cb0f6","#ffc800","#ff4b8b","#ce82ff","#ff9600"]; let h="";
+  for(let i=0;i<36;i++)h+=`<span class="confetti" style="left:${Math.random()*100}%;background:${cs[i%6]};animation-duration:${1.6+Math.random()*1.6}s;animation-delay:${Math.random()*.5}s"></span>`; return h }
+function renderResult(s){
+  if(s.mode==="exam"){ const p=s.pct, v=p>=85?["🏆","Exam-ready pace!","var(--green-d)"]:p>=70?["💪","Getting close","var(--gold-d)"]:["📚","Keep drilling","var(--blue-d)"];
+    const missed=s.answers.filter(a=>!a.ok), unans=s.items.length-s.answers.length;
+    app.innerHTML=`<div class="result">${p>=85?confetti():""}<div class="big">${v[0]}</div><h1 style="color:${v[2]}">${p}% · ${v[1]}</h1>
+      <div class="muted">${s.ok} of ${s.items.length} correct in ${fmtDur(s.time)}${unans?` · ${unans} unanswered (time ran out)`:""}. Aim for 85%+ before booking.</div>
+      <div class="card" style="text-align:left;margin-top:20px">${UNITS.map(u=>{const b=s.by[u.n]||{ok:0,n:0},m=b.n?Math.round(b.ok/b.n*100):0;
+        return `<div class="dom" style="${uvars(u)}"><div class="row"><span>${u.n}. ${esc(u.name)}</span><span style="color:${u.t}">${b.ok}/${b.n}</span></div><div class="pbar"><i style="width:${m}%"></i></div></div>`}).join("")}</div>
+      ${missed.length?`<h2 class="sec" style="text-align:left">Review your misses</h2><div class="missed">${missed.map(a=>{const Q=ALLQ[a.id];
+        return `<div class="card"><div class="q">${esc(Q.q.replace(/\s*True or False\?\s*$/,""))}</div><div class="a y">✕ ${esc(a.chosen)}</div><div class="a c">✓ ${esc(Q.opts[0])}</div><div class="e">${esc(Q.e)}</div></div>`}).join("")}</div>`:""}
+      <div style="margin-top:16px"><button class="btn" data-act="home">Continue</button></div></div>`;
+    return }
+  const perfect=s.mode==="lesson"&&s.bad===0;
+  app.innerHTML=`<div class="result">${confetti()}<div class="big">${perfect?"🌟":"🎉"}</div><h1>${s.mode==="lesson"?(perfect?"Perfect lesson!":"Lesson complete!"):"Practice complete!"}</h1>
+    <div class="muted">${s.mode==="lesson"?esc(s.l.t):esc(s.title||"")}</div>
+    <div class="tiles"><div class="rt" style="--c:var(--gold)"><div class="h">Total XP</div><div class="v">⚡${s.xp}</div></div>
+      <div class="rt" style="--c:var(--green)"><div class="h">${s.acc>=90?"Amazing":"Accuracy"}</div><div class="v">${s.acc}%</div></div>
+      <div class="rt" style="--c:var(--blue)"><div class="h">Time</div><div class="v">${fmtDur(s.time)}</div></div></div>
+    ${s.goalHit?`<div class="banner fire"><span class="e">🔥</span><span>Daily goal hit! You're on a <b>${S.streak}-day streak</b>.</span></div>`:""}
+    ${s.heart?`<div class="banner heart"><span class="e">❤️</span><span>You earned a heart back (${S.hearts}/${MAXH}).</span></div>`:""}
+    ${s.maxCombo>=5?`<div class="banner fire"><span class="e">⚡</span><span>Best combo: ${s.maxCombo} in a row</span></div>`:""}
+    <div style="margin-top:auto;padding-top:20px"><button class="btn" data-act="home">Continue</button></div></div>` }
+
+/* ---------- main render ---------- */
+function render(){
+  if(view==="session"){renderSession();return}
+  regen();
+  const body=view==="review"?reviewView():view==="exam"?examView():view==="stats"?statsView():learnView();
+  app.innerHTML=header()+`<main>${body}</main>`+nav();
+  const di=document.getElementById("examDate"); if(di)di.addEventListener("change",()=>{S.settings.examDate=di.value;save();render()});
+  drawOverlay() }
+
+const ACT={
+  go:v=>{view=v;overlay=null;render();window.scrollTo(0,0)},
+  home:()=>{sess=null;view="learn";overlay=null;render();window.scrollTo(0,0)},
+  lessonSheet:v=>lessonSheet(v), startLesson:v=>startLesson(v), startReview:()=>startReview(), startDomain:v=>startDomain(+v), startExam:()=>startExam(),
+  close:()=>closeSheet(), hearts:()=>heartsSheet(),
+  streakInfo:()=>openSheet(`<h2>🔥 ${curStreak()}-day streak</h2><ul style="--uc:var(--orange)"><li>Hit your daily goal (${S.settings.goal} XP) to keep the streak going.</li><li>Your longest streak is ${S.longest} days.</li><li>Lessons give 10 XP (15 if perfect). Practice gives 5+ XP, and exams give 1 XP per correct answer.</li></ul><button class="btn ghost" data-act="close">Got it</button>`),
+  xpInfo:()=>openSheet(`<h2>⚡ ${S.xp} XP</h2><div class="muted" style="margin:8px 0 18px">${S.days[dayKey()]||0} XP today. Change your daily goal in Stats.</div><button class="btn ghost" data-act="close">Close</button>`),
+  pick:v=>pick(+v), check:()=>check(), next:()=>next(), tile:v=>tile(v), examNext:()=>examNext(),
+  quit:()=>openSheet(`<div class="center"><div style="font-size:54px">🥺</div><h2>Wait, don't go!</h2><div class="muted" style="margin:6px 0 18px">${sess&&sess.mode==="exam"?"This exam attempt won't be scored.":"You'll lose this session's progress."} Answers you've already checked still count toward review.</div></div>
+    <button class="btn" data-act="close">Keep going</button><button class="btn plain" data-act="quitYes" style="color:var(--red-d)">End session</button>`),
+  quitYes:()=>{ if(sess)clearInterval(sess.tick); save(); ACT.home() },
+  goal:v=>{S.settings.goal=+v;save();render()},
+  sound:()=>{S.settings.sound=!S.settings.sound;save();render();sfx("good")},
+  resetAsk:()=>openSheet(`<h2>Reset all progress?</h2><div class="muted" style="margin:6px 0 18px">This clears XP, streaks, lessons, review history and exam scores. You can't undo it.</div><button class="btn red" data-act="resetYes">Reset everything</button><button class="btn ghost" data-act="close">Cancel</button>`),
+  resetYes:()=>{const keep=S.settings;S=defState();S.settings=keep;save();overlay=null;view="learn";render()}
+};
+document.addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b||b.disabled)return;const f=ACT[b.dataset.act];if(f){e.preventDefault();f(b.dataset.v)}});
+document.addEventListener("keydown",e=>{ if(view!=="session"||!sess||overlay)return; const it=sess.items[sess.i];
+  if(it.kind==="mcq"&&sess.state==="answer"&&/^[1-9]$/.test(e.key)&&+e.key<=it.opts.length){pick(+e.key-1)}
+  else if(e.key==="Enter"){ e.preventDefault(); if(sess.mode==="exam")examNext(); else if(it.kind==="mcq"&&sess.state==="answer")check(); else next() } });
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&view!=="session"&&view!=="result"){ if(regen())save(); render() } });
+
+/* Android app hooks: hardware back button and widget "Practice" button */
+window.__back=function(){
+  if(overlay){closeSheet();return true}
+  if(view==="session"&&sess){ACT.quit();return true}
+  if(view==="result"){ACT.home();return true}
+  if(view!=="learn"){ACT.go("learn");return true}
+  return false };
+window.__openReview=function(){ if(view==="session")return; startReview() };
+
+if(regen())save();
+render();
+pushWidget();
+if(location.hash==="#review"&&view!=="session"){ try{history.replaceState(null,"",location.pathname)}catch(e){} startReview() }
+initCloud();
+})();
+</script>
+</body>
+</html>
