@@ -30,7 +30,11 @@ jobs:
           if [ -z "$SIGNING_KEYSTORE_BASE64" ]; then
             echo "::error::SIGNING_KEYSTORE_BASE64 secret is not set"; exit 1
           fi
-          echo "$SIGNING_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+          # Strip any whitespace or line breaks picked up when the secret was pasted
+          printf '%s' "$SIGNING_KEYSTORE_BASE64" | tr -d '[:space:]' | base64 -d > "$RUNNER_TEMP/release.keystore"
+          # Fingerprint of the encrypted keystore file (safe to log) to confirm it arrived intact
+          echo "Keystore size: $(stat -c%s "$RUNNER_TEMP/release.keystore") bytes"
+          echo "Keystore sha256 (first 16): $(sha256sum "$RUNNER_TEMP/release.keystore" | cut -c1-16)"
 
       - name: Build APK
         env:
