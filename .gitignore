@@ -3,3 +3,7 @@ build/
 local.properties
 *.iml
 .idea/
+
+# Signing keys never belong in the repo
+*.keystore
+*.jks

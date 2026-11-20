@@ -17,21 +17,30 @@ android {
         versionName "1.0.${buildNumber}"
     }
 
+    // Release signing key comes from environment variables (GitHub Actions secrets).
+    // Nothing secret is stored in this repo.
+    def keystorePath = System.getenv('SIGNING_KEYSTORE_PATH')
+    def hasSigningKey = keystorePath && file(keystorePath).exists()
+
     signingConfigs {
-        release {
-            // Same key every build, so new versions install as updates (progress is kept)
-            storeFile file('release.keystore')
-            storePassword 'REMOVED'
-            keyAlias 'secplus'
-            keyPassword 'REMOVED'
-            storeType 'pkcs12'
+        if (hasSigningKey) {
+            release {
+                // Same key every build, so new versions install as updates (progress is kept)
+                storeFile file(keystorePath)
+                storePassword System.getenv('SIGNING_STORE_PASSWORD')
+                keyAlias System.getenv('SIGNING_KEY_ALIAS')
+                keyPassword System.getenv('SIGNING_KEY_PASSWORD')
+                storeType 'pkcs12'
+            }
         }
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.release
+            if (hasSigningKey) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 
